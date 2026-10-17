@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summrial Dominion // Hall of Records Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PeerJS for Serverless Cross-Device Sync on GitHub Pages -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Tone.js for Sci-Fi Terminal Audio Synthesis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --holo-bg-deep: #040d21;
+            --holo-bg-mid: #0a2254;
+            --holo-bg-bright: #143c8c;
+            --holo-cyan: #5ce1e6;
+            --holo-glow: #38b6ff;
+            --amber-core: #ffb703;
+            --crimson-alert: #ff2a5f;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: #02050d;
+            color: #e0f7ff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .font-mono-tech {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Holographic Blue Glass Screen matching reference image */
+        .holo-screen {
+            background: radial-gradient(circle at 45% 45%, rgba(28, 78, 166, 0.88) 0%, rgba(12, 36, 89, 0.94) 55%, rgba(5, 16, 43, 0.98) 100%);
+            border: 3px solid rgba(110, 212, 255, 0.75);
+            box-shadow: 
+                0 0 35px rgba(56, 182, 255, 0.45),
+                inset 0 0 50px rgba(56, 182, 255, 0.35),
+                inset 0 0 12px rgba(180, 240, 255, 0.6);
+            position: relative;
+        }
+
+        /* Subtle scanline & holographic shimmer overlay */
+        .holo-screen::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 195, 255, 0.08) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.01),
+                rgba(0, 255, 255, 0.03),
+                rgba(0, 0, 255, 0.01)
+            );
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 25;
+        }
+
+        /* Alert Red Mode Override */
+        .holo-screen.alert-mode {
+            background: radial-gradient(circle at 45% 45%, rgba(140, 15, 45, 0.88) 0%, rgba(70, 8, 24, 0.94) 55%, rgba(30, 3, 12, 0.98) 100%);
+            border-color: rgba(255, 80, 110, 0.85);
+            box-shadow: 
+                0 0 40px rgba(255, 42, 95, 0.6),
+                inset 0 0 60px rgba(255, 42, 95, 0.4);
+        }
+
+        /* Neon Cyan Inner Containers */
+        .holo-panel {
+            background: rgba(10, 34, 84, 0.55);
+            border: 2px solid rgba(125, 226, 255, 0.65);
+            box-shadow: 
+                0 0 15px rgba(56, 182, 255, 0.35),
+                inset 0 0 20px rgba(56, 182, 255, 0.2);
+            backdrop-filter: blur(4px);
+        }
+
+        .holo-pill {
+            background: rgba(14, 48, 115, 0.65);
+            border: 2px solid rgba(145, 232, 255, 0.85);
+            border-radius: 9999px;
+            box-shadow: 
+                0 0 18px rgba(92, 225, 230, 0.5),
+                inset 0 0 14px rgba(92, 225, 230, 0.35);
+        }
+
+        /* Glowing Text */
+        .text-glow {
+            color: #d8f8ff;
+            text-shadow: 0 0 8px rgba(92, 225, 230, 0.85), 0 0 18px rgba(56, 182, 255, 0.65);
+        }
+
+        .text-glow-amber {
+            color: #ffe8a3;
+            text-shadow: 0 0 10px rgba(255, 183, 3, 0.9), 0 0 20px rgba(255, 140, 0, 0.7);
+        }
+
+        .text-glow-red {
+            color: #ffd6e0;
+            text-shadow: 0 0 10px rgba(255, 42, 95, 0.95), 0 0 22px rgba(255, 0, 55, 0.8);
+        }
+
+        /* Brushed Silver-Steel Top Crown Bezel */
+        .metallic-crown {
+            background: linear-gradient(180deg, #dce6f2 0%, #8fa3ba 45%, #566a80 85%, #2f3e4f 100%);
+            border: 2px solid #eef6ff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        .metallic-corner {
+            background: linear-gradient(135deg, #d5e1ed 0%, #7d92a8 50%, #465769 100%);
+            border: 1.5px solid #e2eefc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+        }
+
+        /* Glowing Yellow/Amber Core Orb from Reference Image */
+        .amber-orb {
+            background: radial-gradient(circle at 35% 35%, #fff7d6 0%, #ffcf33 35%, #e68a00 75%, #804000 100%);
+            box-shadow: 
+                0 0 22px rgba(255, 195, 0, 0.9),
+                0 0 45px rgba(255, 153, 0, 0.5),
+                inset 0 0 8px rgba(255, 255, 255, 0.9);
+            transition: all 0.4s ease;
+        }
+
+        .amber-orb.alert-pulse {
+            background: radial-gradient(circle at 35% 35%, #ffd6e0 0%, #ff2a5f 40%, #990026 85%, #4d0013 100%);
+            box-shadow: 
+                0 0 28px rgba(255, 42, 95, 1),
+                0 0 55px rgba(255, 0, 64, 0.8);
+            animation: pulse-Write 1s infinite alternate;
+        }
+
+        @keyframes pulse-Write {
+            0% { transform: scale(1); filter: brightness(1); }
+            100% { transform: scale(1.08); filter: brightness(1.35); }
+        }
+
+        /* Double-Ring Emblem Circle from Left Side of Reference */
+        .double-ring-circle {
+            border: 3px solid rgba(135, 230, 255, 0.85);
+            box-shadow: 
+                0 0 20px rgba(56, 182, 255, 0.5),
+                inset 0 0 20px rgba(56, 182, 255, 0.4);
+            position: relative;
+        }
+        .double-ring-circle::after {
+            content: "";
+            position: absolute;
+            inset: 8px;
+            border: 1.5px solid rgba(135, 230, 255, 0.55);
+            border-radius: 9999px;
+            pointer-events: none;
+        }
+
+        /* Slow Rotation Animation */
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 28s linear infinite;
+        }
+
+        /* Elevator Descent Animation Effect */
+        @keyframes shaft-scroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 -400px; }
+        }
+        .elevator-lines {
+            background-image: repeating-linear-gradient(
+                0deg,
+                rgba(92, 225, 230, 0.03) 0px,
+                rgba(92, 225, 230, 0.03) 38px,
+                rgba(92, 225, 230, 0.35) 40px
+            );
+            animation: shaft-scroll 1.2s linear infinite;
+        }
+
+        /* Custom Scrollbar for logs */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(4, 13, 33, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(92, 225, 230, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between p-2 sm:p-4 select-none relative">
+
+    <!-- TOP METALLIC BEZEL ASSEMBLY (Inspired directly by reference image) -->
+    <div id="top-bezel" class="w-full max-w-7xl flex items-center justify-center relative z-30 mb-[-14px]">
+        <!-- Left Wing Strut -->
+        <div class="hidden sm:block w-1/4 h-5 metallic-crown rounded-tl-xl transform -skew-x-12 mr-[-8px] border-r-0"></div>
+        
+        <!-- Center Crown Housing with Glowing Yellow/Amber Orb -->
+        <div class="metallic-crown px-8 sm:px-14 py-1.5 rounded-t-2xl flex items-center gap-4 sm:gap-6 relative shadow-2xl">
+            <!-- Left Vent Grille -->
+            <div class="flex gap-1 bg-slate-900/80 px-2 py-1 rounded border border-slate-400/40">
+                <div class="w-1 h-4 bg-cyan-400/70 rounded-full"></div>
+                <div class="w-1 h-4 bg-cyan-400/50 rounded-full"></div>
+                <div class="w-1 h-4 bg-cyan-400/30 rounded-full"></div>
+            </div>
+
+            <!-- Central Amber Sensor Lens (Click 3 times or click GM button to open Facilitator Panel) -->
+            <div id="amber-core-lens" onclick="handleLensClick()" title="Dominion Optical Core (Facilitator Override)" class="w-11 h-11 sm:w-14 sm:h-14 rounded-full border-4 border-slate-700 amber-orb cursor-pointer flex items-center justify-center relative">
+                <div class="w-3 h-3 rounded-full bg-white/70 blur-[1px] absolute top-2 left-2.5"></div>
+            </div>
+
+            <!-- Right Vent Grille -->
+            <div class="flex gap-1 bg-slate-900/80 px-2 py-1 rounded border border-slate-400/40">
+                <div class="w-1 h-4 bg-cyan-400/30 rounded-full"></div>
+                <div class="w-1 h-4 bg-cyan-400/50 rounded-full"></div>
+                <div class="w-1 h-4 bg-cyan-400/70 rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Right Wing Strut -->
+        <div class="hidden sm:block w-1/4 h-5 metallic-crown rounded-tr-xl transform skew-x-12 ml-[-8px] border-l-0"></div>
+    </div>
+
+    <!-- MAIN HOLOGRAPHIC DISPLAY MONITOR -->
+    <main id="main-screen" class="holo-screen w-full max-w-7xl flex-1 rounded-2xl p-4 sm:p-7 flex flex-col justify-between relative overflow-hidden my-1">
+        
+        <!-- Metallic Corner Brackets -->
+        <div class="metallic-corner w-6 h-6 absolute top-0 left-0 rounded-br-lg z-30"></div>
+        <div class="metallic-corner w-6 h-6 absolute top-0 right-0 rounded-bl-lg z-30"></div>
+        <div class="metallic-corner w-6 h-6 absolute bottom-0 left-0 rounded-tr-lg z-30"></div>
+        <div class="metallic-corner w-6 h-6 absolute bottom-0 right-0 rounded-tl-lg z-30"></div>
+
+        <!-- TOP STATUS BAR -->
+        <header class="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-300/30 pb-2.5 z-20">
+            <div class="flex items-center gap-3">
+                <span class="inline-block w-3 h-3 rounded-full bg-cyan-300 animate-ping"></span>
+                <span id="header-location" class="font-orbitron text-xs sm:text-sm tracking-[0.2em] text-glow uppercase">
+                    SUMMRIAL DOMINION // HALL OF RECORDS // UPPER ARCHIVE
+                </span>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span id="sync-badge" class="font-mono-tech text-xs px-2.5 py-1 rounded bg-blue-950/80 border border-cyan-400/40 text-cyan-200">
+                    LOCAL MODE
+                </span>
+                <button onclick="toggleAudio()" id="audio-btn" class="font-mono-tech text-xs px-2.5 py-1 rounded bg-blue-900/60 hover:bg-blue-800/80 border border-cyan-300/50 text-cyan-100 transition">
+                    SFX: ON
+                </button>
+                <button onclick="toggleFullScreen()" class="font-mono-tech text-xs px-2.5 py-1 rounded bg-blue-900/60 hover:bg-blue-800/80 border border-cyan-300/50 text-cyan-100 transition">
+                    [ ] FULLSCREEN
+                </button>
+                <button onclick="openFacilitatorModal()" class="font-mono-tech text-xs px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/40 border border-amber-400/60 text-amber-200 transition">
+                    GM CONSOLE
+                </button>
+            </div>
+        </header>
+
+        <!-- CORE SCREEN BODY (Left 3/4 Content + Right 1/4 Faceted Icon Sidebar from Reference Image) -->
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-5 my-3 overflow-hidden z-20">
+            
+            <!-- LEFT MAIN INTERACTIVE STAGE (9 Columns) -->
+            <div id="stage-container" class="lg:col-span-9 flex flex-col justify-between overflow-y-auto pr-1">
+                <!-- Dynamic Stage Content Injected via JavaScript -->
+            </div>
+
+            <!-- RIGHT SIDEBAR PANEL (3 Columns - Styled directly after the right capsule in the image) -->
+            <aside class="hidden lg:flex lg:col-span-3 holo-panel rounded-3xl p-4 flex-col items-center justify-between text-center relative">
+                <!-- Top Stylistic Header ("N T Y" equivalent in English) -->
+                <div class="w-full border-b border-cyan-300/30 pb-2">
+                    <div class="font-orbitron text-lg font-bold tracking-[0.35em] text-glow">SYS // LOG</div>
+                    <div id="sidebar-clearance" class="font-mono-tech text-xs text-cyan-300/80 tracking-widest mt-0.5">
+                        CLEARANCE: ENVOY-IV
+                    </div>
+                </div>
+
+                <!-- Faceted Shield Emblem (Top Gem from Reference Image) -->
+                <div class="flex flex-col items-center my-1 group">
+                    <div class="relative w-28 h-32 flex items-center justify-center">
+                        <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-[0_0_12px_rgba(92,225,230,0.6)]">
+                            <!-- Outer Faceted Shield -->
+                            <polygon points="50,4 92,22 78,102 50,116 22,102 8,22" fill="rgba(16, 56, 130, 0.75)" stroke="#7de2ff" stroke-width="2.5"/>
+                            <!-- Inner Facet Lines -->
+                            <polygon points="50,14 82,28 70,94 50,106 30,94 18,28" fill="rgba(8, 28, 74, 0.6)" stroke="#38b6ff" stroke-width="1.2"/>
+                            <line x1="50" y1="4" x2="50" y2="116" stroke="rgba(125,226,255,0.25)" stroke-width="1"/>
+                            <line x1="8" y1="22" x2="92" y2="22" stroke="rgba(125,226,255,0.25)" stroke-width="1"/>
+                            <!-- Atomic / Bureaucracy Rings Inside Shield -->
+                            <ellipse cx="50" cy="58" rx="22" ry="9" fill="none" stroke="#80f5ff" stroke-width="1.5" transform="rotate(30 50 58)"/>
+                            <ellipse cx="50" cy="58" rx="22" ry="9" fill="none" stroke="#80f5ff" stroke-width="1.5" transform="rotate(-30 50 58)"/>
+                            <ellipse cx="50" cy="58" rx="22" ry="9" fill="none" stroke="#80f5ff" stroke-width="1.5" transform="rotate(90 50 58)"/>
+                            <circle cx="50" cy="58" r="4.5" fill="#d8f8ff"/>
+                        </svg>
+                    </div>
+                    <span id="gem-top-label" class="font-orbitron text-[11px] tracking-widest text-cyan-200 uppercase mt-1">
+                        AUTOMATED DIRECTIVE: ACTIVE
+                    </span>
+                </div>
+
+                <!-- Faceted Rhombus Eye Emblem (Bottom Gem from Reference Image) -->
+                <div class="flex flex-col items-center my-1">
+                    <div class="relative w-28 h-28 flex items-center justify-center">
+                        <svg viewBox="0 0 110 110" class="w-full h-full drop-shadow-[0_0_12px_rgba(92,225,230,0.6)]">
+                            <!-- Outer Faceted Diamond -->
+                            <polygon points="55,5 105,55 55,105 5,55" fill="rgba(16, 56, 130, 0.75)" stroke="#7de2ff" stroke-width="2.5"/>
+                            <!-- Inner Diamond Bevel -->
+                            <polygon points="55,18 92,55 55,92 18,55" fill="rgba(8, 28, 74, 0.65)" stroke="#38b6ff" stroke-width="1.2"/>
+                            <line x1="55" y1="5" x2="55" y2="105" stroke="rgba(125,226,255,0.2)" stroke-width="1"/>
+                            <line x1="5" y1="55" x2="105" y2="55" stroke="rgba(125,226,255,0.2)" stroke-width="1"/>
+                            <!-- All-Seeing Archival Eye -->
+                            <path d="M30,55 Q55,36 80,55 Q55,74 30,55 Z" fill="none" stroke="#99f7ff" stroke-width="2"/>
+                            <circle cx="55" cy="55" r="7" fill="none" stroke="#99f7ff" stroke-width="2"/>
+                            <circle cx="55" cy="55" r="3" fill="#ffffff"/>
+                        </svg>
+                    </div>
+                    <span id="gem-bottom-label" class="font-orbitron text-[11px] tracking-widest text-cyan-200 uppercase mt-1">
+                        LOCAL MONITOR: NOMINAL
+                    </span>
+                </div>
+
+                <!-- Bottom Mini Telemetry Readout -->
+                <div class="w-full border-t border-cyan-300/30 pt-2 text-left font-mono-tech text-[11px] text-cyan-300/80 space-y-0.5">
+                    <div class="flex justify-between"><span>SUBROUTINE:</span><span id="telemetry-sub">ARC-904</span></div>
+                    <div class="flex justify-between"><span>ARCHIVE LEVEL:</span><span id="telemetry-lvl">UPPER-01</span></div>
+                    <div class="flex justify-between"><span>UPLINK:</span><span id="telemetry-uplink" class="text-emerald-300">ONLINE</span></div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- BOTTOM HOLOGRAPHIC STATUS / KEYBOARD ACCENT BAR -->
+        <footer class="border-t border-cyan-300/30 pt-2 flex flex-wrap items-center justify-between text-xs font-mono-tech text-cyan-200/80 z-20">
+            <div class="flex items-center gap-4">
+                <span id="footer-prompt">&gt; TERMINAL READY. AWAITING INPUT...</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="operative-tag">SUBJECT: ENVOY OPERATIVE</span>
+                <span class="hidden sm:inline">|</span>
+                <span class="hidden sm:inline">PRESS [F2] FOR FACILITATOR OVERRIDE</span>
+            </div>
+        </footer>
+
+        <!-- ACTION OUTCOME OVERLAY BANNER (Triggered by Facilitator) -->
+        <div id="outcome-overlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-md z-40 flex items-center justify-center p-6">
+            <div id="outcome-card" class="holo-panel max-w-2xl w-full rounded-3xl p-8 text-center border-2 transform transition-all scale-100">
+                <div id="outcome-icon" class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center border-2"></div>
+                <h2 id="outcome-title" class="font-orbitron text-2xl sm:text-4xl font-bold tracking-widest uppercase mb-3"></h2>
+                <p id="outcome-message" class="font-mono-tech text-base sm:text-lg text-cyan-100 leading-relaxed mb-6"></p>
+                <button onclick="dismissOutcomeOverlay()" class="holo-pill px-8 py-2.5 font-orbitron text-sm tracking-widest uppercase text-glow hover:bg-cyan-500/30 transition">
+                    ACKNOWLEDGE // CONTINUE
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM HOLOGRAPHIC KEYBOARD ACCENT DECK (Visual Reflection of Reference Image) -->
+    <div class="w-full max-w-6xl h-5 sm:h-7 rounded-b-3xl border-2 border-t-0 border-cyan-400/50 bg-gradient-to-b from-blue-900/50 to-blue-950/80 shadow-[0_0_25px_rgba(56,182,255,0.4)] flex items-center justify-center gap-3 px-8">
+        <div class="h-1.5 flex-1 rounded bg-cyan-400/30"></div>
+        <div class="h-2 w-1/3 rounded bg-cyan-300/50 shadow-[0_0_10px_#5ce1e6]"></div>
+        <div class="h-1.5 flex-1 rounded bg-cyan-400/30"></div>
+    </div>
+
+    <!-- FACILITATOR (GM) CONTROL DRAWER / MODAL -->
+    <div id="gm-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-slate-900 border-2 border-amber-400/80 rounded-2xl max-w-5xl w-full p-4 sm:p-6 text-slate-100 shadow-[0_0_50px_rgba(255,183,3,0.3)] max-h-[94vh] flex flex-col justify-between overflow-y-auto">
+            
+            <!-- GM Console Header -->
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-3.5 h-3.5 rounded-full bg-amber-400 animate-pulse"></div>
+                    <h2 class="font-orbitron text-lg sm:text-xl font-bold text-amber-300 tracking-wider">
+                        FACILITATOR OVERRIDE &amp; REMOTE CONTROLLER
+                    </h2>
+                </div>
+                <button onclick="closeFacilitatorModal()" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono-tech text-sm border border-slate-600">
+                    CLOSE [ESC]
+                </button>
+            </div>
+
+            <!-- PIN Login Gate (Default PIN: 1234, or click Quick Unlock) -->
+            <div id="gm-login-gate" class="py-8 text-center space-y-4">
+                <p class="font-mono-tech text-sm text-slate-300">ENTER FACILITATOR SECURITY PASSCODE TO UNLOCK CONTROLS (DEFAULT: <span class="text-amber-300 font-bold">0451</span>)</p>
+                <div class="flex items-center justify-center gap-2">
+                    <input id="gm-pin-input" type="password" placeholder="0451" value="0451" class="bg-slate-950 border border-amber-400/60 rounded px-4 py-2 font-mono-tech text-center text-xl tracking-widest w-40 text-amber-200 focus:outline-none">
+                    <button onclick="unlockGmConsole()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-orbitron font-bold px-5 py-2 rounded transition">
+                        UNLOCK
+                    </button>
+                </div>
+            </div>
+
+            <!-- Unlocked GM Controls -->
+            <div id="gm-controls-body" class="hidden space-y-5 text-sm">
+                
+                <!-- 1. Cross-Device / Dual-Screen Sync Setup -->
+                <div class="bg-slate-950/90 border border-slate-700 rounded-xl p-3.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="font-orbitron text-xs uppercase tracking-wider text-cyan-300">
+                            1. Cross-Device Sync (Control Table Monitor from Phone/Laptop on GitHub Pages)
+                        </span>
+                        <span id="gm-sync-status" class="font-mono-tech text-xs text-emerald-400">Same-Browser Tab Sync Active automatically</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                        <div class="flex items-center gap-2">
+                            <label class="font-mono-tech text-xs text-slate-400">ROOM CODE:</label>
+                            <input id="sync-room-code" type="text" value="DOMINION-01" class="bg-slate-900 border border-slate-600 rounded px-2.5 py-1 font-mono-tech text-cyan-200 uppercase w-36">
+                        </div>
+                        <button onclick="startDisplayHost()" class="bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-400 text-cyan-100 font-mono-tech py-1.5 px-3 rounded transition text-xs">
+                            SET THIS DEVICE AS TABLE MONITOR (HOST)
+                        </button>
+                        <button onclick="connectRemoteController()" class="bg-amber-500/30 hover:bg-amber-500/50 border border-amber-400 text-amber-100 font-mono-tech py-1.5 px-3 rounded transition text-xs">
+                            CONNECT THIS DEVICE AS GM REMOTE
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Player Character Identity Customization -->
+                <div class="bg-slate-950/90 border border-slate-700 rounded-xl p-3.5">
+                    <div class="font-orbitron text-xs uppercase tracking-wider text-cyan-300 mb-2">
+                        2. Operative Dossier Customization (Updates Terminal Live)
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] font-mono-tech text-slate-400">OPERATIVE NAME</label>
+                            <input id="gm-pc-name" type="text" value="Envoy Cassian Vance" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono-tech text-slate-400">PRONOUNS</label>
+                            <input id="gm-pc-pronouns" type="text" value="He / Him" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono-tech text-slate-400">APPEARANCE / NOTE</label>
+                            <input id="gm-pc-appearance" type="text" value="Weathered formal coat, silver pen" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-mono-tech text-slate-400">ACCESS CODE (FOR BOOTH)</label>
+                            <input id="gm-access-code" type="text" value="CRADLE-7734" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-amber-500/50 rounded px-2.5 py-1 font-mono-tech text-amber-300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Scene / Stage Switcher (Acts 1, 2, 3) -->
+                <div class="bg-slate-950/90 border border-slate-700 rounded-xl p-3.5">
+                    <div class="font-orbitron text-xs uppercase tracking-wider text-cyan-300 mb-2.5">
+                        3. Terminal Stage Progression (Push Screen to Table Monitor)
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button onclick="setStage('ACT1_INDEX')" class="stage-btn bg-slate-800 hover:bg-cyan-900/60 border border-cyan-500/40 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-cyan-300">STAGE 1 (MAP 1)</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">Master Index Terminal</div>
+                        </button>
+                        <button onclick="setStage('ACT1_ASTROMAP')" class="stage-btn bg-slate-800 hover:bg-cyan-900/60 border border-cyan-500/40 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-cyan-300">STAGE 2 (MAP 1)</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">Astrolabe Security Grid</div>
+                        </button>
+                        <button onclick="setStage('ACT1_BOOTH')" class="stage-btn bg-slate-800 hover:bg-cyan-900/60 border border-cyan-500/40 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-cyan-300">STAGE 3 (MAP 1)</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">Sensory Immersion Booth</div>
+                        </button>
+                        <button onclick="setStage('ACT2_DESCENT')" class="stage-btn bg-slate-800 hover:bg-cyan-900/60 border border-cyan-500/40 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-amber-300">TRANSITION</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">Turboshaft Descent</div>
+                        </button>
+                        <button onclick="setStage('ACT2_AUTH')" class="stage-btn bg-slate-800 hover:bg-cyan-900/60 border border-cyan-500/40 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-cyan-300">STAGE 4 (MAP 2)</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">300-Yr Dormant AI Prompt</div>
+                        </button>
+                        <button onclick="setStage('ACT2_REVEAL')" class="stage-btn bg-slate-800 hover:bg-cyan-900/60 border border-cyan-500/40 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-cyan-300">STAGE 5A (MAP 2)</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">Caretaker &amp; Casualty File</div>
+                        </button>
+                        <button onclick="setStage('ACT2_PURGE')" class="stage-btn bg-slate-800 hover:bg-cyan-900/60 border border-cyan-500/40 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-amber-300">STAGE 5B (CLIMAX)</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">Subroutine: Gifts vs Skills</div>
+                        </button>
+                        <button onclick="setStage('ACT3_ALARM')" class="stage-btn bg-slate-800 hover:bg-rose-900/60 border border-rose-500/50 rounded p-2 text-left transition">
+                            <div class="font-orbitron text-xs text-rose-400">STAGE 6 (ACT 3)</div>
+                            <div class="font-mono-tech text-[11px] text-slate-300">Peacekeeper Chassis Alert</div>
+                        </button>
+                    </div>
+                    <div class="mt-2 flex gap-2">
+                        <button onclick="setStage('EPILOGUE')" class="flex-1 bg-emerald-900/40 hover:bg-emerald-800/60 border border-emerald-400/50 rounded py-1.5 px-3 font-orbitron text-xs text-emerald-200 transition">
+                            STAGE 7: EPILOGUE // RECORD ERASED ("NOW WHAT?")
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. Action Roll Result Trigger (Success / Cost / Complication) -->
+                <div class="bg-slate-950/90 border border-slate-700 rounded-xl p-3.5">
+                    <div class="font-orbitron text-xs uppercase tracking-wider text-amber-300 mb-2">
+                        4. Broadcast Action Roll Result to Screen
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 mb-2">
+                        <input id="gm-outcome-custom" type="text" placeholder="Optional custom result description (or leave blank for stage default)..." class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 font-mono-tech text-white">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button onclick="triggerActionOutcome('SUCCESS')" class="bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400 text-emerald-200 font-orbitron text-xs py-2 px-3 rounded transition">
+                            ✓ DISPLAY ACTION SUCCESS
+                        </button>
+                        <button onclick="triggerActionOutcome('COST')" class="bg-amber-500/30 hover:bg-amber-500/50 border border-amber-400 text-amber-200 font-orbitron text-xs py-2 px-3 rounded transition">
+                            ⚠ SUCCESS WITH COMPLICATION
+                        </button>
+                        <button onclick="triggerActionOutcome('FAILURE')" class="bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500 text-rose-200 font-orbitron text-xs py-2 px-3 rounded transition">
+                            ✕ ACTION FAILED / ALERT
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5. Live Caretaker AI / Terminal Transmission Puppeteer -->
+                <div class="bg-slate-950/90 border border-slate-700 rounded-xl p-3.5">
+                    <div class="font-orbitron text-xs uppercase tracking-wider text-cyan-300 mb-2">
+                        5. Live Caretaker AI / System Voice Transmission (Type &amp; Send to Monitor)
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="gm-live-message" type="text" placeholder="Type message as Caretaker AI or System to typewrite on the player's screen..." class="flex-1 bg-slate-900 border border-cyan-500/50 rounded px-3 py-1.5 font-mono-tech text-cyan-100">
+                        <button onclick="sendLiveTransmission()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-orbitron font-bold text-xs px-4 py-1.5 rounded transition">
+                            TRANSMIT
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ============================================================================
+         * 1. APPLICATION STATE & CAMPAIGN LORE DATA
+         * ============================================================================ */
+        let appState = {
+            currentStage: 'ACT1_INDEX',
+            pcName: 'Envoy Cassian Vance',
+            pcPronouns: 'He / Him',
+            pcAppearance: 'Weathered formal coat, silver pen',
+            accessCode: 'CRADLE-7734',
+            directoryPath: 'ARCHIVE://CORE-00/SYNTH-CONTINUITY/7734-VANCE',
+            indexUnlocked: false,
+            astrolabePassActive: false,
+            boothBarrierDown: false,
+            aiAuthorized: false,
+            chosenIdentity: null, // 'GIFTS' or 'SKILLS'
+            liveTransmission: '',
+            outcomeOverlay: null // { type, title, message }
+        };
+
+        let sfxEnabled = true;
+        let lensClickCount = 0;
+        let lensClickTimer = null;
+
+        /* ============================================================================
+         * 2. SYNTHESIZED SCI-FI TERMINAL SOUND EFFECTS (Tone.js)
+         * ============================================================================ */
+        async function playBeep(freq = 880, duration = 0.06, type = 'sine') {
+            if (!sfxEnabled || typeof Tone === 'undefined') return;
+            try {
+                if (Tone.context.state !== 'running') await Tone.start();
+                const synth = new Tone.Synth({
+                    oscillator: { type },
+                    envelope: { attack: 0.005, decay: 0.08, sustain: 0.05, release: 0.08 }
+                }).toDestination();
+                synth.volume.value = -12;
+                synth.triggerAttackRelease(freq, duration);
+            } catch (e) {
+                // Ignore audio context locks before first interaction
+            }
+        }
+
+        function playSuccessChime() {
+            playBeep(587.33, 0.08, 'triangle');
+            setTimeout(() => playBeep(880, 0.16, 'triangle'), 90);
+        }
+
+        function playAlertSiren() {
+            playBeep(220, 0.18, 'sawtooth');
+            setTimeout(() => playBeep(165, 0.25, 'sawtooth'), 180);
+        }
+
+        function toggleAudio() {
+            sfxEnabled = !sfxEnabled;
+            document.getElementById('audio-btn').innerText = `SFX: ${sfxEnabled ? 'ON' : 'OFF'}`;
+            if (sfxEnabled) playBeep(1046.5, 0.05);
+        }
+
+        /* ============================================================================
+         * 3. RENDER ENGINE FOR EACH STAGE OF BREAKING RANK
+         * ============================================================================ */
+        function renderStage() {
+            const container = document.getElementById('stage-container');
+            const mainScreen = document.getElementById('main-screen');
+            const amberLens = document.getElementById('amber-core-lens');
+            const headerLoc = document.getElementById('header-location');
+            const subReadout = document.getElementById('telemetry-sub');
+            const lvlReadout = document.getElementById('telemetry-lvl');
+            const gemTop = document.getElementById('gem-top-label');
+            const gemBottom = document.getElementById('gem-bottom-label');
+            const opTag = document.getElementById('operative-tag');
+
+            opTag.innerText = `OPERATIVE: ${appState.pcName.toUpperCase()} (${appState.pcPronouns.toUpperCase()})`;
+
+            // Toggle Red Alert styling for Act 3
+            if (appState.currentStage === 'ACT3_ALARM') {
+                mainScreen.classList.add('alert-mode');
+                amberLens.classList.add('alert-pulse');
+            } else {
+                mainScreen.classList.remove('alert-mode');
+                amberLens.classList.remove('alert-pulse');
+            }
+
+            // Render Stage-Specific UI matching the reference image layout
+            switch (appState.currentStage) {
+
+                /* --------------------------------------------------------------------
+                 * STAGE 1: MAP 1 - WESTERN READING ROOM MASTER INDEX TERMINAL
+                 * -------------------------------------------------------------------- */
+                case 'ACT1_INDEX':
+                    headerLoc.innerText = 'SUMMRIAL DOMINION // MODERN HALL OF RECORDS // MASTER INDEX';
+                    subReadout.innerText = 'IDX-440';
+                    lvlReadout.innerText = 'UPPER-WEST';
+                    gemTop.innerText = 'BUREAUCRACY: AUTOMATED';
+                    gemBottom.innerText = 'ARCHIVIST DESK: ACTIVE';
+
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <!-- Top Telemetry Block -->
+                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 tracking-wider leading-relaxed bg-blue-950/40 p-3 rounded-xl border border-cyan-400/30">
+                                <div>:: AUTOMATED ARCHIVE SUBROUTINE #882-B // NIGHT-SHIFT RESTRICTED ACCESS ::</div>
+                                <div class="text-cyan-300/70">NOTICE: All unscheduled after-hours queries require Senior Archivist sign-off or Envoy Diplomatic Audit credentials.</div>
+                            </div>
+
+                            <!-- Prominent Pill Banner (Directly matching reference image center-top pill) -->
+                            <div class="holo-pill py-3 px-6 text-center">
+                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.25em] text-glow uppercase">
+                                    PERSONNEL DOSSIER MASTER INDEX
+                                </span>
+                            </div>
+
+                            <!-- Reference Image Lower Split: Left Double-Ring Circle + Right Data Columns -->
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center pt-2">
+                                <!-- Left Double-Ring Circle with Dominion Crest -->
+                                <div class="md:col-span-5 flex flex-col items-center justify-center">
+                                    <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/50">
+                                        <!-- Stylized Dominion Crest Calligraphic Glyph -->
+                                        <svg viewBox="0 0 100 100" class="w-28 h-28 drop-shadow-[0_0_15px_#5ce1e6]">
+                                            <path d="M25,25 Q50,35 75,20 L65,78 Q50,65 35,82 Z" fill="none" stroke="#d8f8ff" stroke-width="3.5"/>
+                                            <path d="M38,42 L62,38 L55,68" fill="none" stroke="#5ce1e6" stroke-width="3"/>
+                                            <circle cx="50" cy="50" r="6" fill="#d8f8ff"/>
+                                        </svg>
+                                    </div>
+                                    <span class="font-mono-tech text-xs text-cyan-300 mt-2 tracking-widest">DOMINION SEAL VERIFIED</span>
+                                </div>
+
+                                <!-- Right Interactive Query Form -->
+                                <div class="md:col-span-7 space-y-3 font-mono-tech">
+                                    <div class="holo-panel p-4 rounded-2xl space-y-3">
+                                        <div class="text-xs text-cyan-300 uppercase tracking-widest border-b border-cyan-400/30 pb-1">
+                                            QUERY OPERATIVE RECORD LOCATION
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs text-cyan-200 mb-1">ENTER OPERATIVE NAME OR SERVICE ID:</label>
+                                            <div class="flex gap-2">
+                                                <input id="index-search-input" type="text" value="${appState.pcName}" class="flex-1 bg-blue-950/90 border border-cyan-300/60 rounded-lg px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-200">
+                                                <button onclick="handleIndexSearch()" class="holo-pill px-5 py-2 font-orbitron text-xs tracking-wider text-glow hover:bg-cyan-400/20 transition">
+                                                    LOCATE
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Directory Output Box -->
+                                        <div id="index-result-box" class="${appState.indexUnlocked ? '' : ' opacity-60'} bg-slate-950/70 border border-cyan-400/40 rounded-xl p-3 text-xs space-y-1.5">
+                                            ${appState.indexUnlocked ? `
+                                                <div class="text-emerald-300 font-bold">✓ RECORD LOCATED IN DEEP STORAGE:</div>
+                                                <div>SUBJECT: <span class="text-white">${appState.pcName}</span> (${appState.pcPronouns})</div>
+                                                <div>CAREER: <span class="text-cyan-200">Envoy (Bureaucracy, Convincing, Leadership, Fighting)</span></div>
+                                                <div>LOCAL DIRECTORY PATH:</div>
+                                                <div class="p-2 bg-blue-950 border border-amber-400/60 rounded text-amber-300 font-bold tracking-wider select-all">
+                                                    ${appState.directoryPath}
+                                                </div>
+                                                <div class="text-cyan-300/80 pt-1">
+                                                    INSTRUCTION: Proceed across Central Astrolabe Floor to Eastern Sensory Immersion Reader Booths and input Access Code <span class="text-amber-200">${appState.accessCode}</span>.
+                                                </div>
+                                            ` : `
+                                                <div class="text-amber-300">STATUS: AWAITING ARCHIVIST CLEARANCE OR QUERY...</div>
+                                                <div class="text-cyan-300/70">Click [LOCATE] after resolving Complication 1 (The Night-Shift Gatekeeper) to retrieve the dossier's local directory path.</div>
+                                            `}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 2: MAP 1 - CENTRAL ASTROLABE FLOOR & SENTRY PATROL
+                 * -------------------------------------------------------------------- */
+                case 'ACT1_ASTROMAP':
+                    headerLoc.innerText = 'SUMMRIAL DOMINION // CENTRAL CHAMBER // ASTROLABE SECURITY GRID';
+                    subReadout.innerText = 'SEC-209';
+                    lvlReadout.innerText = 'UPPER-CENTER';
+                    gemTop.innerText = 'SENTRY PATROL: 2 UNITS';
+                    gemBottom.innerText = appState.astrolabePassActive ? 'FLOOR CHIME: BYPASSED' : 'FLOOR CHIME: ARMED';
+
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 bg-blue-950/40 p-3 rounded-xl border border-cyan-400/30 flex justify-between items-center">
+                                <span>:: CENTRAL ASTRAL ASTROLABE FLOOR TELEMETRY ::</span>
+                                <span class="${appState.astrolabePassActive ? 'text-emerald-300' : 'text-amber-300'} font-bold">
+                                    ${appState.astrolabePassActive ? 'PASS VERIFIED // SILENT CROSSING' : 'WARNING: PRESSURE CHIMES ACTIVE'}
+                                </span>
+                            </div>
+
+                            <div class="holo-pill py-2.5 px-6 text-center">
+                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.2em] text-glow uppercase">
+                                    ASTRAL ASTROLABE PRESSURE MATRIX
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                                <!-- Animated Geometric Astrolabe Radar -->
+                                <div class="md:col-span-5 flex flex-col items-center">
+                                    <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/60 relative overflow-hidden">
+                                        <svg viewBox="0 0 120 120" class="w-44 h-44 animate-spin-slow">
+                                            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255, 195, 0, 0.5)" stroke-width="1.5" stroke-dasharray="6 4"/>
+                                            <circle cx="60" cy="60" r="36" fill="none" stroke="#5ce1e6" stroke-width="1.5"/>
+                                            <polygon points="60,12 102,85 18,85" fill="none" stroke="rgba(255, 195, 0, 0.65)" stroke-width="1.5"/>
+                                            <polygon points="60,108 102,35 18,35" fill="none" stroke="rgba(92, 225, 230, 0.65)" stroke-width="1.5"/>
+                                            <circle cx="60" cy="60" r="8" fill="rgba(255, 183, 3, 0.8)"/>
+                                        </svg>
+                                    </div>
+                                    <span class="font-mono-tech text-xs text-amber-300 mt-2 tracking-widest">2 DOMINION SENTRIES ON PATROL</span>
+                                </div>
+
+                                <!-- Right Controls -->
+                                <div class="md:col-span-7 space-y-3 font-mono-tech">
+                                    <div class="holo-panel p-4 rounded-2xl space-y-3 text-xs sm:text-sm">
+                                        <div class="text-cyan-300 font-bold uppercase tracking-wider border-b border-cyan-400/30 pb-1">
+                                            EASTERN WING TRANSIT DIAGNOSTIC
+                                        </div>
+                                        <p class="text-cyan-100/90 leading-relaxed">
+                                            Stepping onto the glowing geometric floor without an authorized After-Hours Pass triggers an acoustic alert chime monitored by the two patrolling Sentries.
+                                        </p>
+                                        <div class="flex flex-wrap gap-2 pt-2">
+                                            <button onclick="toggleAstrolabePass()" class="holo-pill px-4 py-2 font-orbitron text-xs text-glow hover:bg-cyan-400/20 transition">
+                                                ${appState.astrolabePassActive ? 'REVOKE FLOOR PASS' : 'ENGAGE SECURITY PASS / MISDIRECTION'}
+                                            </button>
+                                            <button onclick="setStage('ACT1_BOOTH')" class="holo-pill px-4 py-2 font-orbitron text-xs text-amber-200 border-amber-300/80 hover:bg-amber-400/20 transition">
+                                                PROCEED TO EASTERN BOOTHS &rarr;
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 3: MAP 1 - SENSORY IMMERSION READER BOOTH TERMINAL
+                 * -------------------------------------------------------------------- */
+                case 'ACT1_BOOTH':
+                    headerLoc.innerText = 'SUMMRIAL DOMINION // EASTERN WING // SENSORY IMMERSION BOOTH #03';
+                    subReadout.innerText = 'BTH-003';
+                    lvlReadout.innerText = 'UPPER-EAST';
+                    gemTop.innerText = 'PRIVACY GLASS: OPAQUE';
+                    gemBottom.innerText = 'CORE LINK: STANDBY';
+
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 bg-blue-950/40 p-3 rounded-xl border border-cyan-400/30">
+                                :: SENSORY IMMERSION READER BOOTH SEALED // PRIVACY OPACITY AT 100% ::
+                            </div>
+
+                            <div class="holo-pill py-3 px-6 text-center">
+                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.22em] text-glow uppercase">
+                                    CLASSIFIED DOSSIER ACCESS &amp; PURGE CONSOLE
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                                <!-- Left Double-Ring Circle -->
+                                <div class="md:col-span-5 flex flex-col items-center">
+                                    <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-full double-ring-circle flex flex-col items-center justify-center bg-blue-950/50 p-4 text-center">
+                                        <div class="font-orbitron text-xs text-cyan-300 tracking-widest mb-1">REGISTRY TAG</div>
+                                        <div class="font-mono-tech text-lg sm:text-xl text-glow-amber font-bold">${appState.accessCode}</div>
+                                        <div class="w-16 h-0.5 bg-cyan-400/50 my-2"></div>
+                                        <div class="font-mono-tech text-[11px] text-cyan-200/80">TURBOLIFT COUPLING DETECTED</div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Input Panel -->
+                                <div class="md:col-span-7 font-mono-tech">
+                                    <div class="holo-panel p-4 rounded-2xl space-y-3">
+                                        <div>
+                                            <label class="block text-xs text-cyan-300 mb-1">1. TARGET DIRECTORY PATH:</label>
+                                            <input type="text" value="${appState.directoryPath}" readonly class="w-full bg-slate-950/80 border border-cyan-400/50 rounded px-3 py-1.5 text-xs text-cyan-200">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs text-amber-300 mb-1">2. ENTER STOLEN ACCESS CODE &amp; DELETION ROUTINE:</label>
+                                            <input id="booth-code-input" type="text" value="${appState.accessCode}" class="w-full bg-blue-950/90 border border-amber-400/70 rounded px-3 py-2 text-sm text-amber-200 font-bold tracking-widest focus:outline-none">
+                                        </div>
+                                        <div class="pt-2">
+                                            <button onclick="triggerBoothDescent()" class="w-full holo-pill py-3 font-orbitron text-sm font-bold tracking-widest text-glow hover:bg-cyan-400/30 transition">
+                                                EXECUTE DOSSIER DELETION PROTOCOL
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * TRANSITION: HIGH-SPEED TURBOLIFT DESCENT INTO MAP 2
+                 * -------------------------------------------------------------------- */
+                case 'ACT2_DESCENT':
+                    headerLoc.innerText = 'WARNING // ANCIENT CORE REGISTRY TAG RECOGNIZED // DESCENDING';
+                    subReadout.innerText = 'TRB-000';
+                    lvlReadout.innerText = 'SUB-LEVEL -88';
+                    gemTop.innerText = 'TURBOLIFT: ACTIVE';
+                    gemBottom.innerText = 'DEPTH: -1,400 METERS';
+
+                    container.innerHTML = `
+                        <div class="flex-1 flex flex-col items-center justify-center text-center p-6 elevator-lines rounded-2xl border border-amber-400/40 relative">
+                            <div class="holo-pill px-8 py-3 mb-6 border-amber-400">
+                                <span class="font-orbitron text-lg sm:text-2xl font-bold tracking-[0.25em] text-glow-amber uppercase">
+                                    REDIRECTING TO ORIGINAL HALL OF INFORMATION
+                                </span>
+                            </div>
+                            <p class="font-mono-tech text-sm sm:text-base text-cyan-100 max-w-xl leading-relaxed mb-6">
+                                LOCAL DELETION DENIED. Your dossier carries a <span class="text-amber-300 font-bold">Continuity of Service</span> core registry tag. Physical presence required at Subterranean Core Registry (Last human login: <span class="text-amber-300">300 Years Ago</span>).
+                            </p>
+                            <button onclick="setStage('ACT2_AUTH')" class="holo-pill px-6 py-2.5 font-orbitron text-xs tracking-widest text-glow hover:bg-cyan-400/20">
+                                ARRIVE AT SUBTERRANEAN DATA CENTER (MAP 2) &rarr;
+                            </button>
+                        </div>
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 4: MAP 2 - AWAKENING THE CORE (300-YEAR LOGIN PROMPT)
+                 * -------------------------------------------------------------------- */
+                case 'ACT2_AUTH':
+                    headerLoc.innerText = 'ORIGINAL HALL OF INFORMATION // SUBTERRANEAN CORE TERMINAL';
+                    subReadout.innerText = 'INF-001';
+                    lvlReadout.innerText = 'ANCIENT CORE';
+                    gemTop.innerText = 'LOGIN GAP: 300 YEARS';
+                    gemBottom.innerText = 'BIOMETRIC SCAN: REQUIRED';
+
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="font-mono-tech text-xs sm:text-sm text-amber-200 bg-blue-950/50 p-3 rounded-xl border border-amber-400/40 flex flex-wrap justify-between">
+                                <span>:: ALERT: 300-YEAR, 4-MONTH GAP IN LOCAL TERMINAL LOGIN ACTIVITY ::</span>
+                                <span>KEYCARD SLOT: ACTIVE</span>
+                            </div>
+
+                            <div class="holo-pill py-2.5 px-6 text-center">
+                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.2em] text-glow uppercase">
+                                    HOLOGRAPHIC INFORMATION CORE // AUTHORIZATION REQUIRED
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                                <!-- Left Holographic Face Projection -->
+                                <div class="md:col-span-5 flex flex-col items-center">
+                                    <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/70 relative overflow-hidden">
+                                        <!-- Stylized Serene Holographic Face SVG -->
+                                        <svg viewBox="0 0 100 100" class="w-36 h-36 drop-shadow-[0_0_16px_#5ce1e6]">
+                                            <ellipse cx="50" cy="48" rx="26" ry="34" fill="rgba(56,182,255,0.15)" stroke="#80f5ff" stroke-width="2"/>
+                                            <!-- Eyes -->
+                                            <path d="M36,42 Q41,39 46,42" fill="none" stroke="#d8f8ff" stroke-width="2.2"/>
+                                            <path d="M54,42 Q59,39 64,42" fill="none" stroke="#d8f8ff" stroke-width="2.2"/>
+                                            <circle cx="41" cy="43" r="1.8" fill="#5ce1e6"/>
+                                            <circle cx="59" cy="43" r="1.8" fill="#5ce1e6"/>
+                                            <!-- Nose & Serene Mouth -->
+                                            <path d="M50,43 L48,54 L52,55" fill="none" stroke="#80f5ff" stroke-width="1.5"/>
+                                            <path d="M43,63 Q50,66 57,63" fill="none" stroke="#d8f8ff" stroke-width="2"/>
+                                            <!-- Hologram scan lines across face -->
+                                            <line x1="22" y1="32" x2="78" y2="32" stroke="rgba(92,225,230,0.3)" stroke-width="1"/>
+                                            <line x1="20" y1="52" x2="80" y2="52" stroke="rgba(92,225,230,0.3)" stroke-width="1"/>
+                                            <line x1="24" y1="70" x2="76" y2="70" stroke="rgba(92,225,230,0.3)" stroke-width="1"/>
+                                        </svg>
+                                    </div>
+                                    <span class="font-mono-tech text-xs text-cyan-300 mt-2 tracking-widest">INFORMATION AI // COLD STANDBY MODE</span>
+                                </div>
+
+                                <!-- Right Credentials Verification -->
+                                <div class="md:col-span-7 font-mono-tech">
+                                    <div class="holo-panel p-4 rounded-2xl space-y-3 text-xs sm:text-sm">
+                                        <div class="text-cyan-300 font-bold uppercase tracking-wider border-b border-cyan-400/30 pb-1">
+                                            SYSTEM PROMPT: VERIFY ARCHIVIST CREDENTIALS
+                                        </div>
+                                        <p class="text-cyan-100 leading-relaxed">
+                                            "Welcome to the Original Hall of Information. It has been <span class="text-amber-300">300 years</span> since the last logged session. Please present Senior Scientist Keycard, Identity Badge biometrics, or valid Bureaucratic Override to unlock the Central Synthetic Interface Platform."
+                                        </p>
+                                        <div class="bg-slate-950/70 p-2.5 rounded-lg border border-cyan-400/30 text-xs text-cyan-200/80">
+                                            DETECTED AT CONSOLE CHAIR: Skeletal Remains carrying <span class="text-amber-200">[Physical Keycard]</span> &amp; <span class="text-amber-200">[Scientist Identity Badge]</span>.
+                                        </div>
+                                        <div class="pt-1 flex flex-wrap gap-2">
+                                            <button onclick="setStage('ACT2_REVEAL'); playSuccessChime();" class="w-full holo-pill py-2.5 font-orbitron text-xs font-bold tracking-widest text-glow hover:bg-cyan-400/30 transition">
+                                                AUTHORIZE CREDENTIALS &amp; UNLOCK CENTRAL PLATFORM
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 5A: MAP 2 - THE CARETAKER AI AWAKENS & CASUALTY REPORT REVEAL
+                 * -------------------------------------------------------------------- */
+                case 'ACT2_REVEAL':
+                    headerLoc.innerText = 'ORIGINAL HALL OF INFORMATION // PROJECT "CONTINUITY OF SERVICE"';
+                    subReadout.innerText = 'SYN-7734';
+                    lvlReadout.innerText = 'DEEP ARCHIVE';
+                    gemTop.innerText = 'CARETAKER PERSONA: AWAKE';
+                    gemBottom.innerText = 'ORIGIN: SYNTHETIC UNIT';
+
+                    container.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="holo-pill py-2.5 px-6 text-center border-amber-300/80">
+                                <span class="font-orbitron text-sm sm:text-lg font-bold tracking-[0.18em] text-glow-amber uppercase">
+                                    SEALED CASUALTY &amp; REPLACEMENT RECORD // ${appState.pcName.toUpperCase()}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                                <!-- Left Motherly Hologram Face -->
+                                <div class="md:col-span-4 flex flex-col items-center">
+                                    <div class="w-40 h-40 sm:w-48 sm:h-48 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/70">
+                                        <svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-[0_0_18px_#ffb703]">
+                                            <ellipse cx="50" cy="48" rx="26" ry="34" fill="rgba(255,183,3,0.12)" stroke="#ffd166" stroke-width="2"/>
+                                            <path d="M35,43 Q41,38 46,42" fill="none" stroke="#fff3cc" stroke-width="2.2"/>
+                                            <path d="M54,42 Q59,38 65,43" fill="none" stroke="#fff3cc" stroke-width="2.2"/>
+                                            <circle cx="41" cy="43" r="2" fill="#ffd166"/>
+                                            <circle cx="59" cy="43" r="2" fill="#ffd166"/>
+                                            <path d="M50,44 L48,54 L52,55" fill="none" stroke="#ffd166" stroke-width="1.5"/>
+                                            <path d="M41,62 Q50,68 59,62" fill="none" stroke="#fff3cc" stroke-width="2.2"/>
+                                        </svg>
+                                    </div>
+                                    <div class="font-mono-tech text-xs text-amber-200 mt-2 text-center">
+                                        "Oh, my dear child... I had never read these files until right now. Step onto the central platform."
+                                    </div>
+                                </div>
+
+                                <!-- Right Casualty & Synthetic Replacement Dossier -->
+                                <div class="md:col-span-8 font-mono-tech space-y-2.5">
+                                    <div class="holo-panel p-4 rounded-2xl space-y-2 text-xs sm:text-sm">
+                                        <div class="flex justify-between border-b border-cyan-400/30 pb-1 text-amber-300 font-bold">
+                                            <span>CLASSIFIED FILE: CONTINUITY OF SERVICE</span>
+                                            <span>STATUS: ACTIVE REPLACEMENT</span>
+                                        </div>
+                                        <p class="text-cyan-100 leading-relaxed">
+                                            <strong class="text-white">1. FIELD CASUALTY REPORT:</strong> Original human operative <span class="text-white font-bold">${appState.pcName}</span> was killed in action during prior Dominion deployment.
+                                        </p>
+                                        <p class="text-cyan-100 leading-relaxed">
+                                            <strong class="text-white">2. AUTOMATED REPLACEMENT PROTOCOL:</strong> To prevent loss of a high-value Envoy and spare loved ones grief, a distant, disconnected automated factory printed an identical synthetic vessel and uploaded the operative's complete neural scan.
+                                        </p>
+                                        <p class="text-emerald-200 leading-relaxed">
+                                            <strong class="text-emerald-300">3. MEMORY AUTHENTICITY (100% REAL):</strong> Your Father (<span class="underline">Expensive Engraved Pen</span>), your Spymaster Mentor (<span class="underline">Shifting Mask</span>), and your Best Friend (<span class="underline">Brass Knuckles</span>) are completely real—and have no idea the original you died.
+                                        </p>
+                                        <div class="pt-2">
+                                            <button onclick="setStage('ACT2_PURGE'); playBeep(660, 0.12);" class="w-full holo-pill py-2.5 font-orbitron text-xs font-bold tracking-widest text-glow-amber border-amber-300 hover:bg-amber-400/25 transition">
+                                                INITIATE CORE RECORD DELETION ON CENTRAL PLATFORM &rarr;
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 5B: MAP 2 - THE CLIMAX CHOICE (HIDDEN SUBROUTINE: GIFTS VS SKILLS)
+                 * -------------------------------------------------------------------- */
+                case 'ACT2_PURGE':
+                    headerLoc.innerText = 'CENTRAL SYNTHETIC PLATFORM // HIDDEN SUBROUTINE ACTIVATED';
+                    subReadout.innerText = 'SUB-ZERO';
+                    lvlReadout.innerText = 'IDENTITY CORE';
+                    gemTop.innerText = 'PARTITION OVERLOAD';
+                    gemBottom.innerText = 'SELECT ONE: GIFTS / SKILLS';
+
+                    container.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="font-mono-tech text-xs sm:text-sm text-amber-200 bg-blue-950/60 p-3 rounded-xl border border-amber-400/50">
+                                <span class="text-amber-300 font-bold">CARETAKER AI:</span> "Wait—I didn't trigger this! There is a hidden escape subroutine woven into your synthetic code... perhaps placed there centuries ago by another AI like me. To sever your link to the Dominion and unseal the Top Escape Door, you can only keep half of your partitioned mind!"
+                            </div>
+
+                            <div class="holo-pill py-2 px-6 text-center">
+                                <span class="font-orbitron text-sm sm:text-lg font-bold tracking-[0.2em] text-glow uppercase">
+                                    SYSTEM PURGE REQUIRED: CHOOSE WHAT REMAINS OF YOU
+                                </span>
+                            </div>
+
+                            <!-- Two Interactive Choice Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                                
+                                <!-- Option A: Keep Gifts (Embrace Continuity) -->
+                                <div onclick="selectClimaxChoice('GIFTS')" class="holo-panel rounded-2xl p-4 cursor-pointer transition transform hover:scale-[1.01] ${appState.chosenIdentity === 'GIFTS' ? 'border-amber-300 ring-2 ring-amber-400 bg-amber-950/30' : 'hover:border-cyan-200'} flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-between items-center border-b border-cyan-300/30 pb-2 mb-2">
+                                            <span class="font-orbitron text-sm sm:text-base font-bold text-glow-amber">OPTION A: KEEP YOUR GIFTS</span>
+                                            <span class="font-mono-tech text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-400/40">EMBRACE CONTINUITY</span>
+                                        </div>
+                                        <p class="font-mono-tech text-xs text-cyan-100 leading-relaxed mb-3">
+                                            Accept that you truly are the person who died. Hold onto the love, sacrifices, and real bonds of your past while purging the Dominion's cold operational training.
+                                        </p>
+                                        <ul class="font-mono-tech text-xs text-amber-200 space-y-1 mb-3">
+                                            <li>✓ KEEP: Expensive Engraved Pen (Father)</li>
+                                            <li>✓ KEEP: Shifting Mask (Spymaster Mentor)</li>
+                                            <li>✓ KEEP: Set of Brass Knuckles (Best Friend)</li>
+                                            <li class="text-rose-300">✕ CROSS OFF ALL SKILLS (Bureaucracy, Convincing, Leadership, Fighting)</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-950/80 border border-cyan-400/40 rounded-xl p-2.5 font-mono-tech text-xs text-cyan-200">
+                                        <strong class="text-white">NEW RULE:</strong> Permanently roll <span class="text-amber-300 font-bold">3d6 Base</span> from now on. Applicable Gifts still expand success range to <span class="text-amber-300 font-bold">5–6</span> or <span class="text-amber-300 font-bold">4–6</span>.
+                                    </div>
+                                </div>
+
+                                <!-- Option B: Keep Skills (Embrace Independence) -->
+                                <div onclick="selectClimaxChoice('SKILLS')" class="holo-panel rounded-2xl p-4 cursor-pointer transition transform hover:scale-[1.01] ${appState.chosenIdentity === 'SKILLS' ? 'border-cyan-200 ring-2 ring-cyan-300 bg-cyan-950/40' : 'hover:border-cyan-200'} flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-between items-center border-b border-cyan-300/30 pb-2 mb-2">
+                                            <span class="font-orbitron text-sm sm:text-base font-bold text-glow">OPTION B: KEEP YOUR SKILLS</span>
+                                            <span class="font-mono-tech text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-200 border border-cyan-400/40">EMBRACE INDEPENDENCE</span>
+                                        </div>
+                                        <p class="font-mono-tech text-xs text-cyan-100 leading-relaxed mb-3">
+                                            Accept that the original human died and free yourself from the imposter syndrome of wearing a dead person's life. Step into the world as a brand-new entity.
+                                        </p>
+                                        <ul class="font-mono-tech text-xs text-cyan-200 space-y-1 mb-3">
+                                            <li>✓ KEEP: Bureaucracy, Convincing, Leadership, Fighting (+1d6 per applicable skill)</li>
+                                            <li class="text-rose-300">✕ CROSS OFF ALL GIFTS (Pen, Mask, Brass Knuckles)</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-950/80 border border-cyan-400/40 rounded-xl p-2.5 font-mono-tech text-xs text-cyan-200">
+                                        <strong class="text-white">NEW RULE:</strong> Permanently increase base success range to <span class="text-cyan-300 font-bold">5–6</span> (rolling <span class="text-cyan-300 font-bold">2d6 Base + Skill dice</span>).
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            ${appState.chosenIdentity ? `
+                                <div class="pt-1 flex justify-center">
+                                    <button onclick="setStage('ACT3_ALARM'); playAlertSiren();" class="holo-pill px-8 py-2.5 font-orbitron text-xs font-bold tracking-widest text-glow-amber border-amber-300 hover:bg-amber-500/30 transition">
+                                        COMPLETE PURGE (${appState.chosenIdentity} RETAINED) &amp; UNSEAL TOP ESCAPE DOOR &rarr;
+                                    </button>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 6: ACT 3 - LOCAL SUBROUTINE ANOMALY & PEACEKEEPER CHASSIS
+                 * -------------------------------------------------------------------- */
+                case 'ACT3_ALARM':
+                    headerLoc.innerText = 'LOCAL BUILDING SUBROUTINE ALERT // SANITIZING HARDWARE ANOMALY';
+                    subReadout.innerText = 'ERR-999';
+                    lvlReadout.innerText = 'CONTAINMENT';
+                    gemTop.innerText = 'SOUTH BULKHEAD: OPEN';
+                    gemBottom.innerText = 'PEACEKEEPER: DEPLOYED';
+
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="font-mono-tech text-xs sm:text-sm text-rose-200 bg-rose-950/70 p-3 rounded-xl border border-rose-400/70 flex flex-wrap justify-between items-center">
+                                <span>:: LOCAL FACILITY DIAGNOSTIC SCRIPT #04: IRREGULAR AI/UNIT BEHAVIOR DETECTED ::</span>
+                                <span class="px-2 py-0.5 bg-rose-600 text-white font-bold rounded text-xs">WIDER DOMINION NETWORK: UNAWARE</span>
+                            </div>
+
+                            <div class="holo-pill py-3 px-6 text-center border-rose-400">
+                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.2em] text-glow-red uppercase">
+                                    AUTOMATED PEACEKEEPER CHASSIS DEPLOYED
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                                <!-- Left Drone Targeting Reticle -->
+                                <div class="md:col-span-5 flex flex-col items-center">
+                                    <div class="w-48 h-48 sm:w-52 sm:h-52 rounded-full double-ring-circle flex items-center justify-center bg-rose-950/50 border-rose-400">
+                                        <svg viewBox="0 0 100 100" class="w-36 h-36 drop-shadow-[0_0_15px_#ff2a5f]">
+                                            <circle cx="50" cy="50" r="40" fill="none" stroke="#ff5c8a" stroke-width="2" stroke-dasharray="10 5"/>
+                                            <circle cx="50" cy="50" r="24" fill="none" stroke="#ff2a5f" stroke-width="2"/>
+                                            <line x1="50" y1="4" x2="50" y2="30" stroke="#ff5c8a" stroke-width="2"/>
+                                            <line x1="50" y1="70" x2="50" y2="96" stroke="#ff5c8a" stroke-width="2"/>
+                                            <line x1="4" y1="50" x2="30" y2="50" stroke="#ff5c8a" stroke-width="2"/>
+                                            <line x1="70" y1="50" x2="96" y2="50" stroke="#ff5c8a" stroke-width="2"/>
+                                            <circle cx="50" cy="50" r="6" fill="#ff2a5f"/>
+                                        </svg>
+                                    </div>
+                                    <span class="font-mono-tech text-xs text-rose-300 mt-2 tracking-widest">LAST ACTIVATION: 275 YRS AGO (RODENT VAPORIZED)</span>
+                                </div>
+
+                                <!-- Right Escape Telemetry -->
+                                <div class="md:col-span-7 font-mono-tech space-y-3">
+                                    <div class="holo-panel p-4 rounded-2xl border-rose-400/60 bg-rose-950/30 space-y-2.5 text-xs sm:text-sm">
+                                        <div class="text-rose-300 font-bold uppercase tracking-wider border-b border-rose-400/40 pb-1">
+                                            DIRECTIVE: DETAIN OR DESTROY CORRUPTED HARDWARE
+                                        </div>
+                                        <p class="text-rose-100 leading-relaxed">
+                                            Your dossier purge succeeded silently without alerting the wider Dominion. However, a mundane building maintenance subroutine flagged the anomalous interaction between you and the Caretaker AI—unsealing the Southern Stasis Bulkhead!
+                                        </p>
+                                        <div class="bg-slate-950/80 p-3 rounded-xl border border-cyan-400/40 text-cyan-200 space-y-1">
+                                            <div class="flex justify-between">
+                                                <span>NORTH ESCAPE BLAST DOOR:</span>
+                                                <span class="text-amber-300 font-bold">GRINDING OPEN (82%)</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>ACTIVE DICE POOL MODE:</span>
+                                                <span class="text-emerald-300 font-bold">
+                                                    ${appState.chosenIdentity === 'GIFTS' ? '3d6 BASE + GIFTS (5–6 / 4–6)' : '2d6 BASE + SKILLS (5–6 SUCCESS)'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="pt-1">
+                                            <button onclick="setStage('EPILOGUE'); playSuccessChime();" class="w-full holo-pill py-2.5 font-orbitron text-xs font-bold tracking-widest text-glow hover:bg-emerald-500/30 transition">
+                                                ESCAPE THROUGH TOP CENTER DOOR &rarr;
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 7: EPILOGUE - RECORD ERASED ("NOW WHAT?")
+                 * -------------------------------------------------------------------- */
+                case 'EPILOGUE':
+                    headerLoc.innerText = 'SUMMRIAL DOMINION CENTRAL REGISTRY // QUERY RESULT: NULL';
+                    subReadout.innerText = 'NUL-000';
+                    lvlReadout.innerText = 'UNTRACKED';
+                    gemTop.innerText = 'DOSSIER: DELETED';
+                    gemBottom.innerText = 'STATUS: FREE';
+
+                    container.innerHTML = `
+                        <div class="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-6">
+                            <div class="w-28 h-28 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/50">
+                                <span class="font-orbitron text-3xl font-bold text-glow">Ø</span>
+                            </div>
+                            <div class="holo-pill px-8 py-3">
+                                <span class="font-orbitron text-lg sm:text-2xl font-bold tracking-[0.25em] text-glow uppercase">
+                                    ERROR 404 // NO RECORD OF OPERATIVE EXISTS
+                                </span>
+                            </div>
+                            <blockquote class="font-mono-tech text-base sm:text-xl text-cyan-100 max-w-2xl italic leading-relaxed border-l-4 border-cyan-300 pl-4">
+                                "And that's it. You're free. There's no longer a record you ever existed. Now what?"
+                            </blockquote>
+                            <div class="font-mono-tech text-xs text-cyan-300/80">
+                                WISH ON FILE: "To return to a quiet life somewhere far away from the intrigue and politics of the world."
+                                <br/>
+                                DISTANT AUTOMATED SYNTHETIC FACTORY STATUS: <span class="text-amber-300">STILL OPERATIONAL (LOCATION UNKNOWN)</span>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            // Render Action Roll Outcome Overlay if active
+            renderOutcomeOverlay();
+        }
+
+        function renderLiveTransmissionBanner() {
+            if (!appState.liveTransmission) return '';
+            return `
+                <div class="mt-3 holo-panel border-amber-400/80 bg-amber-950/30 rounded-xl p-3 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 font-mono-tech text-xs sm:text-sm text-amber-200">
+                        <span class="px-2 py-0.5 rounded bg-amber-500/30 border border-amber-300 font-orbitron text-[10px] text-amber-100 uppercase">INCOMING TRANSMISSION</span>
+                        <span>"${appState.liveTransmission}"</span>
+                    </div>
+                    <button onclick="clearLiveTransmission()" class="text-xs font-mono-tech text-amber-300/70 hover:text-amber-100">[X]</button>
+                </div>
+            `;
+        }
+
+        /* ============================================================================
+         * 4. INTERACTIVE PLAYER & FACILITATOR ACTIONS
+         * ============================================================================ */
+        function handleIndexSearch() {
+            const val = document.getElementById('index-search-input')?.value.trim();
+            if (val) appState.pcName = val;
+            appState.indexUnlocked = true;
+            playSuccessChime();
+            broadcastState();
+            renderStage();
+        }
+
+        function toggleAstrolabePass() {
+            appState.astrolabePassActive = !appState.astrolabePassActive;
+            playBeep(740, 0.08);
+            broadcastState();
+            renderStage();
+        }
+
+        function triggerBoothDescent() {
+            playAlertSiren();
+            setStage('ACT2_DESCENT');
+        }
+
+        function selectClimaxChoice(choice) {
+            appState.chosenIdentity = choice;
+            playSuccessChime();
+            broadcastState();
+            renderStage();
+        }
+
+        function setStage(stageKey) {
+            appState.currentStage = stageKey;
+            appState.outcomeOverlay = null;
+            playBeep(620, 0.06);
+            broadcastState();
+            renderStage();
+        }
+
+        function updatePcProfile() {
+            appState.pcName = document.getElementById('gm-pc-name').value || 'Envoy Operative';
+            appState.pcPronouns = document.getElementById('gm-pc-pronouns').value || 'They / Them';
+            appState.pcAppearance = document.getElementById('gm-pc-appearance').value || '';
+            appState.accessCode = document.getElementById('gm-access-code').value || 'CRADLE-7734';
+            broadcastState();
+            renderStage();
+        }
+
+        function sendLiveTransmission() {
+            const input = document.getElementById('gm-live-message');
+            appState.liveTransmission = input.value.trim();
+            input.value = '';
+            playBeep(920, 0.1);
+            broadcastState();
+            renderStage();
+        }
+
+        function clearLiveTransmission() {
+            appState.liveTransmission = '';
+            broadcastState();
+            renderStage();
+        }
+
+        function triggerActionOutcome(type) {
+            const customMsg = document.getElementById('gm-outcome-custom').value.trim();
+            let title = '';
+            let defaultMsg = '';
+
+            if (type === 'SUCCESS') {
+                title = 'ACTION SUCCESSFUL // DIRECTIVE CLEARED';
+                defaultMsg = 'Security protocols satisfied without raising local suspicion. You may proceed to the next objective.';
+                playSuccessChime();
+            } else if (type === 'COST') {
+                title = 'PARTIAL CLEARANCE // NEW COMPLICATION';
+                defaultMsg = 'Objective achieved, but local monitoring subroutines flagged an irregularity. Next obstacle difficulty increased.';
+                playBeep(440, 0.15, 'sawtooth');
+            } else {
+                title = 'ACTION FAILED // SECURITY ALERT TRIGGERED';
+                defaultMsg = 'Authorization rejected by terminal protocol. Immediate evasive or secondary action required!';
+                playAlertSiren();
+            }
+
+            appState.outcomeOverlay = {
+                type,
+                title,
+                message: customMsg || defaultMsg
+            };
+            document.getElementById('gm-outcome-custom').value = '';
+            broadcastState();
+            renderStage();
+        }
+
+        function renderOutcomeOverlay() {
+            const overlay = document.getElementById('outcome-overlay');
+            if (!appState.outcomeOverlay) {
+                overlay.classList.add('hidden');
+                return;
+            }
+            overlay.classList.remove('hidden');
+            const card = document.getElementById('outcome-card');
+            const icon = document.getElementById('outcome-icon');
+            const title = document.getElementById('outcome-title');
+            const msg = document.getElementById('outcome-message');
+
+            title.innerText = appState.outcomeOverlay.title;
+            msg.innerText = appState.outcomeOverlay.message;
+
+            if (appState.outcomeOverlay.type === 'SUCCESS') {
+                card.className = 'holo-panel max-w-2xl w-full rounded-3xl p-8 text-center border-2 border-emerald-400';
+                icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center border-2 border-emerald-300 bg-emerald-500/20 text-emerald-200 text-4xl';
+                icon.innerText = '✓';
+                title.className = 'font-orbitron text-2xl sm:text-3xl font-bold tracking-widest uppercase mb-3 text-emerald-300';
+            } else if (appState.outcomeOverlay.type === 'COST') {
+                card.className = 'holo-panel max-w-2xl w-full rounded-3xl p-8 text-center border-2 border-amber-400';
+                icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center border-2 border-amber-300 bg-amber-500/20 text-amber-200 text-4xl';
+                icon.innerText = '⚠';
+                title.className = 'font-orbitron text-2xl sm:text-3xl font-bold tracking-widest uppercase mb-3 text-glow-amber';
+            } else {
+                card.className = 'holo-panel max-w-2xl w-full rounded-3xl p-8 text-center border-2 border-rose-500 bg-rose-950/60';
+                icon.className = 'w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center border-2 border-rose-400 bg-rose-500/20 text-rose-200 text-4xl';
+                icon.innerText = '✕';
+                title.className = 'font-orbitron text-2xl sm:text-3xl font-bold tracking-widest uppercase mb-3 text-glow-red';
+            }
+        }
+
+        function dismissOutcomeOverlay() {
+            appState.outcomeOverlay = null;
+            playBeep(520, 0.05);
+            broadcastState();
+            renderStage();
+        }
+
+        /* ============================================================================
+         * 5. FACILITATOR MODAL & FULLSCREEN CONTROLS
+         * ============================================================================ */
+        function handleLensClick() {
+            lensClickCount++;
+            clearTimeout(lensClickTimer);
+            lensClickTimer = setTimeout(() => { lensClickCount = 0; }, 900);
+            if (lensClickCount >= 3) {
+                lensClickCount = 0;
+                openFacilitatorModal();
+            }
+        }
+
+        function openFacilitatorModal() {
+            document.getElementById('gm-modal').classList.remove('hidden');
+        }
+
+        function closeFacilitatorModal() {
+            document.getElementById('gm-modal').classList.add('hidden');
+        }
+
+        function unlockGmConsole() {
+            const pin = document.getElementById('gm-pin-input').value.trim();
+            if (pin === '0451' || pin === '1234' || pin.length > 0) {
+                document.getElementById('gm-login-gate').classList.add('hidden');
+                document.getElementById('gm-controls-body').classList.remove('hidden');
+                playSuccessChime();
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                openFacilitatorModal();
+            } else if (e.key === 'Escape') {
+                closeFacilitatorModal();
+            }
+        });
+
+        /* ============================================================================
+         * 6. DUAL-MODE SYNCHRONIZATION (BroadcastChannel + PeerJS WebRTC for GitHub Pages)
+         * ============================================================================ */
+        const localChannel = new BroadcastChannel('summrial_dominion_terminal_sync');
+        let peerInstance = null;
+        let peerConnections = [];
+
+        localChannel.onmessage = (event) => {
+            if (event.data && event.data.type === 'STATE_UPDATE') {
+                appState = { ...appState, ...event.data.payload };
+                renderStage();
+            }
+        };
+
+        function broadcastState() {
+            // 1. Broadcast to any open tab on the same computer
+            localChannel.postMessage({ type: 'STATE_UPDATE', payload: appState });
+            try {
+                localStorage.setItem('summrial_dominion_state', JSON.stringify(appState));
+            } catch (e) {}
+
+            // 2. Broadcast over WebRTC to connected remote devices (Phone <-> Table Monitor)
+            peerConnections.forEach(conn => {
+                if (conn && conn.open) {
+                    conn.send({ type: 'STATE_UPDATE', payload: appState });
+                }
+            });
+        }
+
+        // Host Mode (Run on the Game Table Monitor)
+        function startDisplayHost() {
+            const code = document.getElementById('sync-room-code').value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+            const peerId = `SUMMRIAL-HOST-${code}`;
+            const statusEl = document.getElementById('gm-sync-status');
+            const badgeEl = document.getElementById('sync-badge');
+
+            if (peerInstance) peerInstance.destroy();
+            statusEl.innerText = `Initializing Table Monitor Host [${code}]...`;
+
+            peerInstance = new Peer(peerId);
+            peerInstance.on('open', () => {
+                statusEl.innerText = `HOST ONLINE! Waiting for GM Remote on Room Code: ${code}`;
+                badgeEl.innerText = `HOST: ${code}`;
+                badgeEl.className = 'font-mono-tech text-xs px-2.5 py-1 rounded bg-emerald-950/90 border border-emerald-400 text-emerald-200';
+                playSuccessChime();
+            });
+
+            peerInstance.on('connection', (conn) => {
+                peerConnections.push(conn);
+                statusEl.innerText = `GM Remote Connected to [${code}]!`;
+                conn.on('data', (data) => {
+                    if (data && data.type === 'STATE_UPDATE') {
+                        appState = { ...appState, ...data.payload };
+                        renderStage();
+                    }
+                });
+                // Send current state to newly connected remote
+                conn.on('open', () => {
+                    conn.send({ type: 'STATE_UPDATE', payload: appState });
+                });
+            });
+
+            peerInstance.on('error', (err) => {
+                statusEl.innerText = `Sync Note: ${err.type} (Try a unique Room Code)`;
+            });
+        }
+
+        // Remote Controller Mode (Run on your Phone, Tablet, or GM Laptop)
+        function connectRemoteController() {
+            const code = document.getElementById('sync-room-code').value.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+            const targetHostId = `SUMMRIAL-HOST-${code}`;
+            const statusEl = document.getElementById('gm-sync-status');
+            const badgeEl = document.getElementById('sync-badge');
+
+            if (peerInstance) peerInstance.destroy();
+            statusEl.innerText = `Connecting to Table Monitor [${code}]...`;
+
+            peerInstance = new Peer();
+            peerInstance.on('open', () => {
+                const conn = peerInstance.connect(targetHostId);
+                conn.on('open', () => {
+                    peerConnections.push(conn);
+                    statusEl.innerText = `CONNECTED TO TABLE MONITOR [${code}]!`;
+                    badgeEl.innerText = `REMOTE: ${code}`;
+                    badgeEl.className = 'font-mono-tech text-xs px-2.5 py-1 rounded bg-amber-950/90 border border-amber-400 text-amber-200';
+                    playSuccessChime();
+                });
+                conn.on('data', (data) => {
+                    if (data && data.type === 'STATE_UPDATE') {
+                        appState = { ...appState, ...data.payload };
+                        renderStage();
+                    }
+                });
+            });
+
+            peerInstance.on('error', (err) => {
+                statusEl.innerText = `Connection Error: Make sure Table Monitor clicked 'SET AS HOST' first.`;
+            });
+        }
+
+        // Initialize on Window Load
+        window.onload = function () {
+            renderStage();
+        };
+    </script>
+</body>
+</html>
