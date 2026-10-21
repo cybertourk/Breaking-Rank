@@ -461,7 +461,7 @@
                         <div>
                             <label class="block text-[11px] font-mono-tech text-cyan-300">PC PORTRAIT IMAGE (URL / Filename / Upload)</label>
                             <div class="flex gap-1.5 mt-0.5">
-                                <input id="gm-pc-img" type="text" value="pc_portrait.jpg" placeholder="pc_portrait.jpg or https://..." oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-100">
+                                <input id="gm-pc-img" type="text" value="pc_portrait.png" placeholder="pc_portrait.png or https://..." oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-100">
                                 <label class="bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-200 cursor-pointer">
                                     FILE
                                     <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'pc')">
@@ -469,9 +469,9 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-mono-tech text-amber-300">BASE CARETAKER FILENAME (Default: caretaker.jpg)</label>
+                            <label class="block text-[11px] font-mono-tech text-amber-300">BASE CARETAKER FILENAME (Default: caretaker.png)</label>
                             <div class="flex gap-1.5 mt-0.5">
-                                <input id="gm-caretaker-img" type="text" value="caretaker.jpg" placeholder="caretaker.jpg" oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-amber-100">
+                                <input id="gm-caretaker-img" type="text" value="caretaker.png" placeholder="caretaker.png" oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-amber-100">
                                 <label class="bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded px-2.5 py-1 font-mono-tech text-xs text-amber-200 cursor-pointer">
                                     FILE
                                     <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'caretaker')">
@@ -499,27 +499,27 @@
                         <button onclick="setCaretakerExpression('neutral')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
                             <span class="text-lg">😐</span>
                             <span class="font-orbitron text-xs text-pink-200 mt-1">NEUTRAL</span>
-                            <span class="font-mono-tech text-[10px] text-slate-400">caretaker.jpg</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretaker.png</span>
                         </button>
                         <button onclick="setCaretakerExpression('confused')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
                             <span class="text-lg">🤨</span>
                             <span class="font-orbitron text-xs text-pink-200 mt-1">CONFUSED</span>
-                            <span class="font-mono-tech text-[10px] text-slate-400">caretakerconfused.jpg</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakerconfused.png</span>
                         </button>
                         <button onclick="setCaretakerExpression('sad')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
                             <span class="text-lg">🥺</span>
                             <span class="font-orbitron text-xs text-pink-200 mt-1">SAD / PITY</span>
-                            <span class="font-mono-tech text-[10px] text-slate-400">caretakersad.jpg</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakersad.png</span>
                         </button>
                         <button onclick="setCaretakerExpression('shocked')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
                             <span class="text-lg">😲</span>
                             <span class="font-orbitron text-xs text-pink-200 mt-1">SHOCKED</span>
-                            <span class="font-mono-tech text-[10px] text-slate-400">caretakershocked.jpg</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakershocked.png</span>
                         </button>
                         <button onclick="setCaretakerExpression('happy')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
                             <span class="text-lg">😊</span>
                             <span class="font-orbitron text-xs text-pink-200 mt-1">HAPPY</span>
-                            <span class="font-mono-tech text-[10px] text-slate-400">caretakerhappy.jpg</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakerhappy.png</span>
                         </button>
                     </div>
                 </div>
@@ -620,15 +620,15 @@
             pcName: 'Donovan Grey',
             pcPronouns: 'He / Him',
             pcAppearance: 'Middle-aged, clean-cut, professional, does not stand out in a crowd',
-            pcImage: 'pc_portrait.jpg',
-            caretakerImage: 'caretaker.jpg',
+            pcImage: 'pc_portrait.png',
+            caretakerImage: 'caretaker.png',
             caretakerExpression: 'neutral',
             caretakerExpressions: {
-                neutral: 'caretaker.jpg',
-                confused: 'caretakerconfused.jpg',
-                happy: 'caretakerhappy.jpg',
-                sad: 'caretakersad.jpg',
-                shocked: 'caretakershocked.jpg'
+                neutral: 'caretaker.png',
+                confused: 'caretakerconfused.png',
+                happy: 'caretakerhappy.png',
+                sad: 'caretakersad.png',
+                shocked: 'caretakershocked.png'
             },
             accessCode: 'CRADLE-7734',
             directoryPath: 'ARCHIVE://SECTOR-09/PERSONNEL/7734-GREY',
@@ -683,7 +683,7 @@
          * ============================================================================ */
         function getActiveCaretakerImage() {
             const exp = appState.caretakerExpression || 'neutral';
-            return appState.caretakerExpressions?.[exp] || appState.caretakerImage || 'caretaker.jpg';
+            return appState.caretakerExpressions?.[exp] || appState.caretakerImage || 'caretaker.png';
         }
 
         function renderPortraitCircle(imgSrc, fallbackLabel, isCaretaker = false) {
@@ -1292,8 +1292,8 @@
             appState.pcPronouns = document.getElementById('gm-pc-pronouns').value || 'He / Him';
             appState.pcAppearance = document.getElementById('gm-pc-appearance').value || '';
             appState.accessCode = document.getElementById('gm-access-code').value || 'CRADLE-7734';
-            appState.pcImage = document.getElementById('gm-pc-img').value.trim() || 'pc_portrait.jpg';
-            appState.caretakerImage = document.getElementById('gm-caretaker-img').value.trim() || 'caretaker.jpg';
+            appState.pcImage = document.getElementById('gm-pc-img').value.trim() || 'pc_portrait.png';
+            appState.caretakerImage = document.getElementById('gm-caretaker-img').value.trim() || 'caretaker.png';
             appState.caretakerExpressions.neutral = appState.caretakerImage;
             broadcastState();
             renderStage();
