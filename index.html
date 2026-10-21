@@ -440,7 +440,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
                         <div>
                             <label class="block text-[11px] font-mono-tech text-slate-400">OPERATIVE NAME</label>
-                            <input id="gm-pc-name" type="text" value="Envoy Cassian Vance" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-white">
+                            <input id="gm-pc-name" type="text" value="Donovan Grey" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-white">
                         </div>
                         <div>
                             <label class="block text-[11px] font-mono-tech text-slate-400">PRONOUNS</label>
@@ -448,7 +448,7 @@
                         </div>
                         <div>
                             <label class="block text-[11px] font-mono-tech text-slate-400">APPEARANCE / NOTE</label>
-                            <input id="gm-pc-appearance" type="text" value="Classified" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-white">
+                            <input id="gm-pc-appearance" type="text" value="Middle-aged, clean-cut, unremarkable" oninput="updatePcProfile()" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-white">
                         </div>
                         <div>
                             <label class="block text-[11px] font-mono-tech text-slate-400">ACCESS CODE (FOR BOOTH)</label>
@@ -461,7 +461,7 @@
                         <div>
                             <label class="block text-[11px] font-mono-tech text-cyan-300">PC PORTRAIT IMAGE (URL / Filename / Upload)</label>
                             <div class="flex gap-1.5 mt-0.5">
-                                <input id="gm-pc-img" type="text" value="pc_portrait.png" placeholder="pc_portrait.png or https://..." oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-100">
+                                <input id="gm-pc-img" type="text" value="pc_portrait.jpg" placeholder="pc_portrait.jpg or https://..." oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-100">
                                 <label class="bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-200 cursor-pointer">
                                     FILE
                                     <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'pc')">
@@ -617,10 +617,10 @@
          * ============================================================================ */
         let appState = {
             currentStage: 'ACT1_INDEX',
-            pcName: 'Envoy Cassian Vance',
+            pcName: 'Donovan Grey',
             pcPronouns: 'He / Him',
-            pcAppearance: 'Classified',
-            pcImage: 'pc_portrait.png',
+            pcAppearance: 'Middle-aged, clean-cut, professional, does not stand out in a crowd',
+            pcImage: 'pc_portrait.jpg',
             caretakerImage: 'caretaker.jpg',
             caretakerExpression: 'neutral',
             caretakerExpressions: {
@@ -631,7 +631,7 @@
                 shocked: 'caretakershocked.jpg'
             },
             accessCode: 'CRADLE-7734',
-            directoryPath: 'ARCHIVE://SECTOR-09/PERSONNEL/7734-VANCE',
+            directoryPath: 'ARCHIVE://SECTOR-09/PERSONNEL/7734-GREY',
             indexUnlocked: false,
             astrolabePassActive: false,
             boothSubmitted: false,
@@ -1288,11 +1288,11 @@
         }
 
         function updatePcProfile() {
-            appState.pcName = document.getElementById('gm-pc-name').value || 'Envoy Operative';
-            appState.pcPronouns = document.getElementById('gm-pc-pronouns').value || 'They / Them';
+            appState.pcName = document.getElementById('gm-pc-name').value || 'Donovan Grey';
+            appState.pcPronouns = document.getElementById('gm-pc-pronouns').value || 'He / Him';
             appState.pcAppearance = document.getElementById('gm-pc-appearance').value || '';
             appState.accessCode = document.getElementById('gm-access-code').value || 'CRADLE-7734';
-            appState.pcImage = document.getElementById('gm-pc-img').value.trim() || 'pc_portrait.png';
+            appState.pcImage = document.getElementById('gm-pc-img').value.trim() || 'pc_portrait.jpg';
             appState.caretakerImage = document.getElementById('gm-caretaker-img').value.trim() || 'caretaker.jpg';
             appState.caretakerExpressions.neutral = appState.caretakerImage;
             broadcastState();
