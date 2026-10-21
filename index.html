@@ -459,7 +459,7 @@
                     <!-- Custom Portrait Image Paths / Uploads -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5 pt-2.5 border-t border-slate-800">
                         <div>
-                            <label class="block text-[11px] font-mono-tech text-cyan-300">PC PORTRAIT IMAGE URL / FILENAME (or Upload)</label>
+                            <label class="block text-[11px] font-mono-tech text-cyan-300">PC PORTRAIT IMAGE (URL / Filename / Upload)</label>
                             <div class="flex gap-1.5 mt-0.5">
                                 <input id="gm-pc-img" type="text" value="pc_portrait.png" placeholder="pc_portrait.png or https://..." oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-100">
                                 <label class="bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded px-2.5 py-1 font-mono-tech text-xs text-cyan-200 cursor-pointer">
@@ -469,15 +469,58 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-mono-tech text-amber-300">CARETAKER AI IMAGE URL / FILENAME (or Upload)</label>
+                            <label class="block text-[11px] font-mono-tech text-amber-300">BASE CARETAKER FILENAME (Default: caretaker.jpg)</label>
                             <div class="flex gap-1.5 mt-0.5">
-                                <input id="gm-caretaker-img" type="text" value="caretaker.png" placeholder="caretaker.png or https://..." oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-amber-100">
+                                <input id="gm-caretaker-img" type="text" value="caretaker.jpg" placeholder="caretaker.jpg" oninput="updatePcProfile()" class="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 font-mono-tech text-xs text-amber-100">
                                 <label class="bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded px-2.5 py-1 font-mono-tech text-xs text-amber-200 cursor-pointer">
                                     FILE
                                     <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'caretaker')">
                                 </label>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- 2.5 Caretaker AI Real-Time Expression Puppeteer -->
+                <div class="bg-slate-950/90 border border-pink-500/50 rounded-xl p-3.5 shadow-[0_0_20px_rgba(255,42,120,0.15)]">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="font-orbitron text-xs uppercase tracking-wider text-pink-300 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-pink-400 animate-ping"></span>
+                            Caretaker AI Hologram Expression Puppeteer (Live Switcher)
+                        </span>
+                        <span id="active-expression-label" class="font-mono-tech text-xs text-pink-200 bg-pink-950/80 px-2 py-0.5 rounded border border-pink-400/40">
+                            EXPRESSION: NEUTRAL
+                        </span>
+                    </div>
+                    <p class="font-mono-tech text-[11px] text-slate-400 mb-2.5">
+                        Tap an emotion to change the holographic face on the table monitor instantly via your phone/laptop:
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                        <button onclick="setCaretakerExpression('neutral')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
+                            <span class="text-lg">😐</span>
+                            <span class="font-orbitron text-xs text-pink-200 mt-1">NEUTRAL</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretaker.jpg</span>
+                        </button>
+                        <button onclick="setCaretakerExpression('confused')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
+                            <span class="text-lg">🤨</span>
+                            <span class="font-orbitron text-xs text-pink-200 mt-1">CONFUSED</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakerconfused.jpg</span>
+                        </button>
+                        <button onclick="setCaretakerExpression('sad')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
+                            <span class="text-lg">🥺</span>
+                            <span class="font-orbitron text-xs text-pink-200 mt-1">SAD / PITY</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakersad.jpg</span>
+                        </button>
+                        <button onclick="setCaretakerExpression('shocked')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
+                            <span class="text-lg">😲</span>
+                            <span class="font-orbitron text-xs text-pink-200 mt-1">SHOCKED</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakershocked.jpg</span>
+                        </button>
+                        <button onclick="setCaretakerExpression('happy')" class="exp-btn bg-slate-900 hover:bg-pink-950/60 border border-slate-700 hover:border-pink-400 rounded-lg p-2 text-center transition flex flex-col items-center">
+                            <span class="text-lg">😊</span>
+                            <span class="font-orbitron text-xs text-pink-200 mt-1">HAPPY</span>
+                            <span class="font-mono-tech text-[10px] text-slate-400">caretakerhappy.jpg</span>
+                        </button>
                     </div>
                 </div>
 
@@ -578,7 +621,15 @@
             pcPronouns: 'He / Him',
             pcAppearance: 'Classified',
             pcImage: 'pc_portrait.png',
-            caretakerImage: 'caretaker.png',
+            caretakerImage: 'caretaker.jpg',
+            caretakerExpression: 'neutral',
+            caretakerExpressions: {
+                neutral: 'caretaker.jpg',
+                confused: 'caretakerconfused.jpg',
+                happy: 'caretakerhappy.jpg',
+                sad: 'caretakersad.jpg',
+                shocked: 'caretakershocked.jpg'
+            },
             accessCode: 'CRADLE-7734',
             directoryPath: 'ARCHIVE://SECTOR-09/PERSONNEL/7734-VANCE',
             indexUnlocked: false,
@@ -630,11 +681,23 @@
         /* ============================================================================
          * 3. RENDER ENGINE FOR EACH STAGE (IN-UNIVERSE & SPOILER-FREE)
          * ============================================================================ */
-        function renderPortraitCircle(imgSrc, fallbackLabel) {
+        function getActiveCaretakerImage() {
+            const exp = appState.caretakerExpression || 'neutral';
+            return appState.caretakerExpressions?.[exp] || appState.caretakerImage || 'caretaker.jpg';
+        }
+
+        function renderPortraitCircle(imgSrc, fallbackLabel, isCaretaker = false) {
+            const actualSrc = isCaretaker ? getActiveCaretakerImage() : imgSrc;
+            const glowClass = isCaretaker 
+                ? 'drop-shadow-[0_0_25px_rgba(255,105,180,0.65)] ring-2 ring-pink-400/60' 
+                : 'mix-blend-screen filter contrast-125';
+
             return `
-                <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/60 relative overflow-hidden">
-                    <img src="${imgSrc}" alt="${fallbackLabel}" 
-                         class="w-full h-full object-cover rounded-full opacity-90 mix-blend-screen filter contrast-125"
+                <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/60 relative overflow-hidden transition-all duration-500">
+                    <img id="${isCaretaker ? 'caretaker-hologram-img' : 'pc-hologram-img'}" 
+                         src="${actualSrc}" 
+                         alt="${fallbackLabel}" 
+                         class="w-full h-full object-cover rounded-full opacity-95 transition-opacity duration-300 ${glowClass}"
                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div style="display:none;" class="flex-col items-center justify-center text-center p-4">
                         <div class="w-16 h-16 rounded-full border border-cyan-300/50 flex items-center justify-center mb-2">
@@ -911,10 +974,10 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-                                <!-- Left Circle: Uploaded Caretaker Image Slot -->
+                                <!-- Left Circle: Live Caretaker Image Slot with Expressions -->
                                 <div class="md:col-span-5 flex flex-col items-center">
-                                    ${renderPortraitCircle(appState.caretakerImage, 'CORE INTERFACE MONITOR')}
-                                    <span class="font-mono-tech text-xs text-cyan-300 mt-2 tracking-widest">INFORMATION AI // STANDBY</span>
+                                    ${renderPortraitCircle(null, 'CORE INTERFACE MONITOR', true)}
+                                    <span class="font-mono-tech text-xs text-pink-300 mt-2 tracking-widest">INFORMATION AI // STANDBY</span>
                                 </div>
 
                                 <!-- Right Credentials Verification (No spoilers about how to solve) -->
@@ -956,13 +1019,13 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-                                <!-- Left Caretaker Portrait -->
+                                <!-- Left Live Caretaker Portrait -->
                                 <div class="md:col-span-5 flex flex-col items-center">
-                                    ${renderPortraitCircle(appState.caretakerImage, 'ARCHIVE CARETAKER')}
-                                    <span class="font-mono-tech text-xs text-amber-200 mt-2 tracking-widest">CORE INTERFACE ACTIVE</span>
+                                    ${renderPortraitCircle(null, 'ARCHIVE CARETAKER', true)}
+                                    <span class="font-mono-tech text-xs text-pink-300 mt-2 tracking-widest">CORE INTERFACE ACTIVE</span>
                                 </div>
 
-                                <!-- Right In-World File Telemetry (Facilitator delivers the emotional reveal) -->
+                                <!-- Right In-World File Telemetry -->
                                 <div class="md:col-span-7 font-mono-tech space-y-3">
                                     <div class="holo-panel p-4 rounded-2xl space-y-2.5 text-xs sm:text-sm">
                                         <div class="flex justify-between border-b border-cyan-400/30 pb-1 text-amber-300 font-bold">
@@ -1176,6 +1239,15 @@
         /* ============================================================================
          * 4. INTERACTIVE PLAYER & FACILITATOR ACTIONS
          * ============================================================================ */
+        function setCaretakerExpression(expName) {
+            appState.caretakerExpression = expName;
+            const label = document.getElementById('active-expression-label');
+            if (label) label.innerText = `EXPRESSION: ${expName.toUpperCase()}`;
+            playBeep(784, 0.05); // quick synthesized blip
+            broadcastState();
+            renderStage();
+        }
+
         function handleIndexSearch() {
             const val = document.getElementById('index-search-input')?.value.trim();
             if (val) appState.pcName = val;
@@ -1221,7 +1293,8 @@
             appState.pcAppearance = document.getElementById('gm-pc-appearance').value || '';
             appState.accessCode = document.getElementById('gm-access-code').value || 'CRADLE-7734';
             appState.pcImage = document.getElementById('gm-pc-img').value.trim() || 'pc_portrait.png';
-            appState.caretakerImage = document.getElementById('gm-caretaker-img').value.trim() || 'caretaker.png';
+            appState.caretakerImage = document.getElementById('gm-caretaker-img').value.trim() || 'caretaker.jpg';
+            appState.caretakerExpressions.neutral = appState.caretakerImage;
             broadcastState();
             renderStage();
         }
@@ -1236,6 +1309,7 @@
                     document.getElementById('gm-pc-img').value = '[Uploaded Local Image]';
                 } else {
                     appState.caretakerImage = e.target.result;
+                    appState.caretakerExpressions.neutral = e.target.result;
                     document.getElementById('gm-caretaker-img').value = '[Uploaded Local Image]';
                 }
                 broadcastState();
