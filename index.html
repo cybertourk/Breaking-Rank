@@ -633,24 +633,29 @@
                 <div class="bg-slate-950/90 border border-amber-500/50 rounded-xl p-3.5">
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <span class="font-orbitron text-xs uppercase tracking-wider text-amber-300">
-                            3.5 Stage 2 Astrolabe 4-Globe Conduit Controls (4 Successes vs. 3 Audit Flags)
+                            3.5 Stage 2 Astrolabe Puzzle &amp; Roll Controls (Decrypt Hints / Lock Globes / Audit Flags)
                         </span>
-                        <button onclick="gmResetAstrolabe()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 font-mono-tech text-[11px] text-slate-300">
-                            RESET ASTROLABE
-                        </button>
+                        <div class="flex gap-1.5">
+                            <button onclick="gmGrantCalibration()" class="px-2.5 py-0.5 rounded bg-cyan-900/70 hover:bg-cyan-800 border border-cyan-400 font-mono-tech text-[11px] text-cyan-200">
+                                ★ GRANT ROLL HINT (DECRYPT ACTIVE GLOBE)
+                            </button>
+                            <button onclick="gmResetAstrolabe()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 font-mono-tech text-[11px] text-slate-300">
+                                RESET ASTROLABE
+                            </button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
                         <button onclick="gmToggleGlobe(0)" class="bg-slate-900 hover:bg-cyan-950 border border-amber-400/50 rounded p-1.5 font-mono-tech text-xs text-amber-200 transition">
-                            GLOBE I (AUTH)
+                            FORCE GLOBE I
                         </button>
                         <button onclick="gmToggleGlobe(1)" class="bg-slate-900 hover:bg-cyan-950 border border-amber-400/50 rounded p-1.5 font-mono-tech text-xs text-amber-200 transition">
-                            GLOBE II (SEC-09)
+                            FORCE GLOBE II
                         </button>
                         <button onclick="gmToggleGlobe(2)" class="bg-slate-900 hover:bg-cyan-950 border border-amber-400/50 rounded p-1.5 font-mono-tech text-xs text-amber-200 transition">
-                            GLOBE III (TOKEN)
+                            FORCE GLOBE III
                         </button>
                         <button onclick="gmToggleGlobe(3)" class="bg-slate-900 hover:bg-cyan-950 border border-amber-400/50 rounded p-1.5 font-mono-tech text-xs text-amber-200 transition">
-                            GLOBE IV (BOOTH)
+                            FORCE GLOBE IV
                         </button>
                         <button onclick="gmAdjustAuditFlag(1)" class="bg-rose-950/60 hover:bg-rose-900/80 border border-rose-500/60 rounded p-1.5 font-mono-tech text-xs text-rose-200 transition">
                             +1 AUDIT FLAG
@@ -725,6 +730,14 @@
                 astrolabeGlobes: [false, false, false, false], // 4 Golden Globes (0=Top-Left, 1=Mid-Right, 2=Bottom-Right, 3=Bottom-Left)
                 astrolabeSelectedGlobe: 0,
                 astrolabeStrikes: 0, // 0 to 3 Audit Flags
+                astrolabeCalibrated: [false, false, false, false], // Whether each globe's cipher hint is unlocked via a dice roll
+                astrolabeDials: [
+                    [0, 0, 0], // Globe I current ring indices
+                    [0, 0, 0], // Globe II current ring indices
+                    [0, 0, 0], // Globe III current ring indices
+                    [0, 0, 0]  // Globe IV current ring indices
+                ],
+                astrolabeFeedback: '',
                 boothDossierLoaded: false,
                 boothConsoleOpen: false,
                 boothExploitInjected: false,
@@ -810,25 +823,25 @@
                 `
             },
             STAGE2: {
-                title: 'ACT 1 (MAP 1) // COMPLICATION 2: 4-GLOBE ASTROLABE ROUTING CHALLENGE',
+                title: 'ACT 1 (MAP 1) // COMPLICATION 2: 4-GLOBE ASTROLABE ROUTING PUZZLE',
                 html: `
                     <div class="space-y-2.5 text-xs font-mono-tech">
-                        <div><strong class="text-cyan-300">Why Donovan Must Use the Astrolabe:</strong> The octagonal floor in the center of the hall isn't a floor trap—it is a physical <strong>4-Globe Spatial Routing Index</strong>. To route a restricted file from the deep vaults to <strong>Eastern Reader Booth #3</strong>, Donovan must step onto the brass constellation grid and attune the <strong>4 Golden Globes</strong>.</div>
-                        <div><strong class="text-white">The Cover Dynamic (The Two Sentries):</strong> Donovan is a high-clearance Envoy, so his presence here isn't illegal on its face. The only red flags are the <strong>late hour</strong>, his <strong>stolen override code (CRADLE-7734)</strong>, and the fact that he is pulling <strong>his own deep-vault operative dossier</strong>. The two night-shift Sentries are standing nearby watching the hall; if the Astrolabe chimes with an <strong>Audit Flag</strong>, they will step over to investigate or ask questions.</div>
+                        <div><strong class="text-cyan-300">How the Hybrid Puzzle + Dice Mini-Game Works:</strong> To route File #7734-GREY to Eastern Reader Booth #03, Donovan must align the <strong>3 Astral Rings</strong> inside each of the <strong>4 Golden Globes</strong> using clues from his mission (<span class="text-amber-300">Envoy-IV</span>, <span class="text-amber-300">ARCHIVE://SECTOR-09/PERSONNEL/7734-GREY</span>, <span class="text-amber-300">CRADLE-7734</span>, and <span class="text-amber-300">BOOTH #03</span>).</div>
                         <div class="p-2.5 bg-slate-950 border border-emerald-500/40 rounded space-y-1.5">
-                            <strong class="text-emerald-300 block">🎲 MINI-GAME RULES: 4 GLOBES LOCKED vs. 3 AUDIT FLAGS (Base: 1 Success per Globe)</strong>
-                            <div>Have Donovan click each Golden Globe on the terminal (I &rarr; II &rarr; III &rarr; IV), describe how he handles the system prompt &amp; maintains his cool in front of the Sentries, and roll his dice:</div>
+                            <strong class="text-emerald-300 block">🎲 HOW DICE ROLLS HELP SOLVE THE PUZZLE:</strong>
+                            <div>Before dialing a Globe (or to keep the 2 patrolling Sentries from noticing his restricted query), Donovan rolls his dice pool:</div>
                             <ul class="list-disc list-inside pl-1 text-slate-300 space-y-0.5">
-                                <li><strong class="text-emerald-300">1+ Successes:</strong> Click <strong>ATTUNE &amp; LOCK CONDUIT</strong> on screen! That Globe locks in cyan. <em>(Optional: If he rolls 2+ successes on a single roll, let him lock 2 Globes at once!)</em></li>
-                                <li><strong class="text-rose-300">0 Successes (Failure):</strong> Click <strong>LOG AUDIT FLAG (+1 STRIKE)</strong>! The Globe chimes amber, and a Sentry steps closer to ask what restriction code he's running.</li>
+                                <li><strong class="text-cyan-300">1 Success:</strong> Click <strong>[🎲 ROLL SUCCESS: DECRYPT RING TARGETS]</strong> (or <em>Grant Roll Hint</em> in GM Console). It highlights the exact correct ring settings in green `[TARGET]` so he can dial them in without guessing!</li>
+                                <li><strong class="text-emerald-300">2+ Successes:</strong> Let him lock the current Globe <em>and</em> decrypt the next Globe for free!</li>
+                                <li><strong class="text-rose-300">0 Successes (or Wrong Dial Submission):</strong> Triggers <strong>+1 Audit Flag</strong>! A Sentry steps closer to ask why the Astrolabe chimed.</li>
                             </ul>
                         </div>
-                        <div><strong class="text-amber-300">Outcomes:</strong>
-                            <ul class="list-disc list-inside pl-1 text-slate-300">
-                                <li><strong>0–1 Audit Flags:</strong> Clean transfer! The Sentries even unlock Reader Booth #3's night-latch for him out of courtesy.</li>
-                                <li><strong>2 Audit Flags:</strong> File routes to Booth #3, but a suspicious Sentry escorts/watches the Eastern Wing (raising tension at the Booth).</li>
-                                <li><strong>3 Audit Flags:</strong> System flags a mandatory In-Person Sentry Verification before he can enter Booth #3!</li>
-                            </ul>
+                        <div class="bg-slate-950 p-2 rounded border border-amber-500/30 text-amber-200">
+                            <strong>CHEAT SHEET (CORRECT RING COMBINATIONS):</strong><br>
+                            • <strong>Globe I:</strong> DIV: ENVOY CORPS [IV] &rarr; SHIFT: NIGHT EXEMPTION &rarr; LOG: MASK AUDIT TRAIL<br>
+                            • <strong>Globe II:</strong> VAULT: SECTOR-09 &rarr; STACK: PERSONNEL &rarr; RECORD: 7734-GREY<br>
+                            • <strong>Globe III:</strong> PREFIX: CRADLE &rarr; KEY: 7734-OVERRIDE &rarr; ACCESS: BYPASS READ-LOCK<br>
+                            • <strong>Globe IV:</strong> WING: EAST ARCHIVE &rarr; POD: SENSORY BOOTH #03 &rarr; TRACE: PURGE BUFFER
                         </div>
                     </div>
                 `
@@ -930,32 +943,48 @@
                 roman: 'I',
                 title: 'GLOBE I // AFTER-HOURS AUTHORITY CONDUIT',
                 positionLabel: 'NORTH-WEST ASTRAL GLOBE',
-                targetParam: 'DIPLOMATIC NIGHT-FILING EXEMPTION [ENVOY-IV]',
-                desc: 'Attune the primary entry globe to log your late-night archive presence as routine diplomatic research without drawing Sentry scrutiny.'
+                clueHint: 'CLUE: Match your official Career clearance, current time of night, and stealth objective.',
+                rings: [
+                    { label: 'RING 1 [DIVISION]', options: ['DIV: ARTIFICER TECH', 'DIV: ENVOY CORPS [IV]', 'DIV: SENTINEL GUARD', 'DIV: PUBLIC CLERK'], correct: 1 },
+                    { label: 'RING 2 [SCHEDULE]', options: ['SHIFT: DAYTIME PUBLIC', 'SHIFT: QUARANTINE LOCK', 'SHIFT: NIGHT EXEMPTION', 'SHIFT: ARCHIVE AUDIT'], correct: 2 },
+                    { label: 'RING 3 [PROTOCOL]', options: ['LOG: MASK AUDIT TRAIL', 'LOG: BROADCAST ALERT', 'LOG: SENTRY SUMMONS', 'LOG: STANDARD TRACE'], correct: 0 }
+                ]
             },
             {
                 id: 1,
                 roman: 'II',
                 title: 'GLOBE II // DEEP SECTOR VAULT BRIDGE',
                 positionLabel: 'EASTERN ASTRAL GLOBE',
-                targetParam: 'SECTOR-09 // CLASSIFIED PERSONNEL STACKS',
-                desc: 'Bridge the constellation track to Sector-09 where operative dossiers are archived without tripping an restricted-access chime.'
+                clueHint: 'CLUE: Dial the exact 3-part directory path obtained from the West Wing Index Terminal.',
+                rings: [
+                    { label: 'RING 1 [SECTOR]', options: ['VAULT: SECTOR-01', 'VAULT: SECTOR-04', 'VAULT: SECTOR-09', 'VAULT: SECTOR-12'], correct: 2 },
+                    { label: 'RING 2 [CATEGORY]', options: ['STACK: TRADE TREATIES', 'STACK: PERSONNEL', 'STACK: AGRICULTURE', 'STACK: TAX LEDGERS'], correct: 1 },
+                    { label: 'RING 3 [FILE ID]', options: ['RECORD: 1042-VANE', 'RECORD: 4410-KORS', 'RECORD: 9921-NULL', 'RECORD: 7734-GREY'], correct: 3 }
+                ]
             },
             {
                 id: 2,
                 roman: 'III',
                 title: 'GLOBE III // CLEARANCE TOKEN CIPHER',
                 positionLabel: 'SOUTH-EAST ASTRAL GLOBE',
-                targetParam: 'MASK OVERRIDE TOKEN [CRADLE-7734]',
-                desc: 'Smooth over the stolen authorization signature inside the routing matrix so the terminal registers a standard administrative pull.'
+                clueHint: 'CLUE: Input the two halves of your stolen override code and spoof the terminal permissions.',
+                rings: [
+                    { label: 'RING 1 [TOKEN ID]', options: ['PREFIX: SUMMRIAL', 'PREFIX: CITADEL', 'PREFIX: CRADLE', 'PREFIX: CROWN'], correct: 2 },
+                    { label: 'RING 2 [PASSKEY]', options: ['KEY: 0000-GUEST', 'KEY: 7734-OVERRIDE', 'KEY: 9001-ADMIN', 'KEY: 3004-LEGACY'], correct: 1 },
+                    { label: 'RING 3 [PRIVILEGE]', options: ['ACCESS: VIEW ONLY', 'ACCESS: BYPASS READ-LOCK', 'ACCESS: PRINT COPY', 'ACCESS: FLAG SENTRY'], correct: 1 }
+                ]
             },
             {
                 id: 3,
                 roman: 'IV',
                 title: 'GLOBE IV // EASTERN BOOTH TERMINAL DISPATCH',
                 positionLabel: 'SOUTH-WEST ASTRAL GLOBE',
-                targetParam: 'ROUTE TO: SENSORY BOOTH #03 [SCRUB LOCAL LOG]',
-                desc: 'Lock the final constellation conduit to transmit Dossier #7734-GREY to Eastern Reader Booth #03 and clear the rotunda buffer.'
+                clueHint: 'CLUE: Route the unlocked file to your target East Wing pod and wipe the rotunda memory buffer.',
+                rings: [
+                    { label: 'RING 1 [DESTINATION]', options: ['WING: WEST CLERK DESK', 'WING: NORTH BALCONY', 'WING: EAST ARCHIVE', 'WING: GUARD POST'], correct: 2 },
+                    { label: 'RING 2 [TERMINAL]', options: ['POD: SENSORY BOOTH #01', 'POD: SENSORY BOOTH #02', 'POD: SENSORY BOOTH #03', 'POD: PUBLIC KIOSK'], correct: 2 },
+                    { label: 'RING 3 [CLEANUP]', options: ['TRACE: KEEP FULL LOG', 'TRACE: PURGE BUFFER', 'TRACE: NOTIFY CLERK', 'TRACE: SOUND CHIME'], correct: 1 }
+                ]
             }
         ];
 
@@ -1154,10 +1183,14 @@
                  * -------------------------------------------------------------------- */
                 case 'ACT1_ASTROMAP':
                     const globes = appState.astrolabeGlobes || [false, false, false, false];
+                    const calibrated = appState.astrolabeCalibrated || [false, false, false, false];
+                    const dials = appState.astrolabeDials || [[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
                     const lockedCount = globes.filter(Boolean).length;
                     const strikes = appState.astrolabeStrikes || 0;
                     const selIdx = appState.astrolabeSelectedGlobe ?? 0;
                     const activeGlobe = astrolabeGlobeData[selIdx] || astrolabeGlobeData[0];
+                    const activeDials = dials[selIdx] || [0, 0, 0];
+                    const isCalibrated = calibrated[selIdx];
                     const allLocked = lockedCount === 4;
                     const maxStrikes = strikes >= 3;
 
@@ -1167,21 +1200,24 @@
                     gemTop.innerText = allLocked ? 'DISPATCH: COMPLETE' : `GLOBES LOCKED: ${lockedCount}/4`;
                     gemBottom.innerText = maxStrikes ? 'AUDIT: INQUIRY FLAGGED' : `AUDIT FLAGS: ${strikes}/3`;
 
-                    // Helper for SVG Globe rendering matching the 4-globe screenshot
+                    // Helper for SVG Globe rendering (Fixed stationary selection halo - no drifting CSS spin!)
                     const renderSvgGlobe = (idx, cx, cy, roman) => {
                         const isLocked = globes[idx];
                         const isSelected = selIdx === idx;
                         const strokeCol = isLocked ? '#34d399' : '#fbbf24';
                         const fillUrl = isLocked ? 'url(#globeGradCyan)' : 'url(#globeGradGold)';
                         return `
-                            <g onclick="selectAstrolabeGlobe(${idx})" class="cursor-pointer transition-transform duration-300" style="transform-origin: ${cx}px ${cy}px;">
-                                ${isSelected ? `<circle cx="${cx}" cy="${cy}" r="30" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="4 3" class="animate-spin-slow"/>` : ''}
+                            <g onclick="selectAstrolabeGlobe(${idx})" class="cursor-pointer">
+                                ${isSelected ? `
+                                    <circle cx="${cx}" cy="${cy}" r="31" fill="none" stroke="#5ce1e6" stroke-width="2.5" opacity="0.9"/>
+                                    <circle cx="${cx}" cy="${cy}" r="35" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.45"/>
+                                ` : ''}
                                 <circle cx="${cx}" cy="${cy}" r="23" fill="${fillUrl}" stroke="${strokeCol}" stroke-width="${isSelected ? '3' : '1.8'}"/>
                                 <!-- Wireframe Latitude / Longitude Rings -->
                                 <ellipse cx="${cx}" cy="${cy}" rx="23" ry="9" fill="none" stroke="${strokeCol}" stroke-width="0.9" opacity="0.75" transform="rotate(-18 ${cx} ${cy})"/>
                                 <ellipse cx="${cx}" cy="${cy}" rx="9" ry="23" fill="none" stroke="${strokeCol}" stroke-width="0.9" opacity="0.75" transform="rotate(-18 ${cx} ${cy})"/>
                                 <line x1="${cx-23}" y1="${cy}" x2="${cx+23}" y2="${cy}" stroke="${strokeCol}" stroke-width="0.7" opacity="0.5"/>
-                                <circle cx="${cx}" cy="${cy}" r="11" fill="rgba(4, 13, 33, 0.8)" stroke="${strokeCol}" stroke-width="1.2"/>
+                                <circle cx="${cx}" cy="${cy}" r="11" fill="rgba(4, 13, 33, 0.85)" stroke="${strokeCol}" stroke-width="1.2"/>
                                 <text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#ffffff" font-family="Orbitron, sans-serif" font-size="11" font-weight="bold">
                                     ${isLocked ? '✓' : roman}
                                 </text>
@@ -1190,26 +1226,26 @@
                     };
 
                     container.innerHTML = `
-                        <div class="space-y-3">
+                        <div class="space-y-2.5">
                             <!-- Top Telemetry & Audit Status Bar -->
-                            <div class="font-mono-tech text-xs sm:text-sm bg-blue-950/50 p-2.5 rounded-xl border ${maxStrikes ? 'border-rose-400 text-rose-200' : allLocked ? 'border-emerald-400 text-emerald-200' : 'border-amber-400/50 text-amber-200'} flex flex-wrap justify-between items-center gap-2">
-                                <span>:: CENTRAL ASTRAL ASTROLABE // PHYSICAL ARCHIVE ROUTING MATRIX ::</span>
-                                <div class="flex items-center gap-3">
-                                    <span class="px-2 py-0.5 rounded bg-slate-950 border border-cyan-400/50 text-cyan-200">
-                                        CONDUITS LOCKED: <strong>${lockedCount} / 4</strong>
+                            <div class="font-mono-tech text-xs sm:text-sm bg-blue-950/50 p-2 rounded-xl border ${maxStrikes ? 'border-rose-400 text-rose-200' : allLocked ? 'border-emerald-400 text-emerald-200' : 'border-amber-400/50 text-amber-200'} flex flex-wrap justify-between items-center gap-2">
+                                <span>:: CENTRAL ASTRAL ASTROLABE // 3-RING CONDUIT ALIGNMENT PUZZLE ::</span>
+                                <div class="flex items-center gap-2.5">
+                                    <span class="px-2 py-0.5 rounded bg-slate-950 border border-cyan-400/50 text-cyan-200 text-xs">
+                                        GLOBES LOCKED: <strong>${lockedCount} / 4</strong>
                                     </span>
-                                    <span class="px-2 py-0.5 rounded bg-slate-950 border ${strikes > 0 ? 'border-rose-400 text-rose-300' : 'border-amber-400/40 text-amber-200'}">
+                                    <span class="px-2 py-0.5 rounded bg-slate-950 border ${strikes > 0 ? 'border-rose-400 text-rose-300' : 'border-amber-400/40 text-amber-200'} text-xs">
                                         AUDIT FLAGS: <strong>${strikes} / 3</strong>
                                     </span>
                                 </div>
                             </div>
 
-                            <!-- Main Split: Left Octagonal 4-Globe Map + Right Conduit Attunement Controls -->
+                            <!-- Main Split: Left Octagonal 4-Globe Map + Right 3-Ring Dial Puzzle -->
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                                 
-                                <!-- Left Column (5 Cols): Interactive 4-Globe Octagonal Astrolabe (Matching Screenshot) -->
+                                <!-- Left Column (5 Cols): Interactive 4-Globe Octagonal Astrolabe -->
                                 <div class="md:col-span-5 flex flex-col items-center">
-                                    <div class="w-60 h-60 sm:w-64 sm:h-64 relative flex items-center justify-center">
+                                    <div class="w-56 h-56 sm:w-64 sm:h-64 relative flex items-center justify-center">
                                         <svg viewBox="0 0 240 240" class="w-full h-full drop-shadow-[0_0_18px_rgba(255,183,3,0.35)]">
                                             <defs>
                                                 <radialGradient id="globeGradGold" cx="35%" cy="35%" r="65%">
@@ -1236,22 +1272,18 @@
                                             <circle cx="136" cy="96" r="18" fill="none" stroke="#d97706" stroke-width="1.2" opacity="0.65"/>
 
                                             <!-- Conduit Beams Connecting the 4 Globes -->
-                                            <!-- Path 1: Globe I (76,48) -> Globe II (194,114) -->
                                             <line x1="76" y1="48" x2="194" y2="114" 
                                                   stroke="${globes[0] && globes[1] ? '#34d399' : '#d97706'}" 
                                                   stroke-width="${globes[0] && globes[1] ? '3.5' : '1.8'}" 
                                                   stroke-opacity="${globes[0] && globes[1] ? '1' : '0.55'}"/>
-                                            <!-- Path 2: Globe II (194,114) -> Globe III (148,184) -->
                                             <line x1="194" y1="114" x2="148" y2="184" 
                                                   stroke="${globes[1] && globes[2] ? '#34d399' : '#d97706'}" 
                                                   stroke-width="${globes[1] && globes[2] ? '3.5' : '1.8'}" 
                                                   stroke-opacity="${globes[1] && globes[2] ? '1' : '0.55'}"/>
-                                            <!-- Path 3: Globe III (148,184) -> Globe IV (62,182) -->
                                             <line x1="148" y1="184" x2="62" y2="182" 
                                                   stroke="${globes[2] && globes[3] ? '#34d399' : '#d97706'}" 
                                                   stroke-width="${globes[2] && globes[3] ? '3.5' : '1.8'}" 
                                                   stroke-opacity="${globes[2] && globes[3] ? '1' : '0.55'}"/>
-                                            <!-- Path 4: Globe IV (62,182) -> Globe I (76,48) + Cross-Links -->
                                             <line x1="62" y1="182" x2="76" y2="48" 
                                                   stroke="${globes[3] && globes[0] ? '#34d399' : '#d97706'}" 
                                                   stroke-width="${globes[3] && globes[0] ? '3.5' : '1.8'}" 
@@ -1259,22 +1291,27 @@
                                             <line x1="76" y1="48" x2="148" y2="184" stroke="#d97706" stroke-width="1" opacity="0.4"/>
                                             <line x1="62" y1="182" x2="194" y2="114" stroke="#d97706" stroke-width="1" opacity="0.4"/>
 
-                                            <!-- The 4 Golden Holographic Globes (Positioned directly from your map screenshot) -->
+                                            <!-- The 4 Golden Holographic Globes -->
                                             ${renderSvgGlobe(0, 76, 48, 'I')}
                                             ${renderSvgGlobe(1, 194, 114, 'II')}
                                             ${renderSvgGlobe(2, 148, 184, 'III')}
                                             ${renderSvgGlobe(3, 62, 182, 'IV')}
                                         </svg>
                                     </div>
-                                    <span class="font-mono-tech text-[11px] text-amber-300 tracking-widest uppercase mt-1">
-                                        CLICK ANY ASTRAL GLOBE (I–IV) TO SELECT CONDUIT
-                                    </span>
+                                    <div class="text-center space-y-0.5 mt-1">
+                                        <div class="font-mono-tech text-[11px] text-amber-300 tracking-widest uppercase">
+                                            SELECT GLOBE (I–IV) &amp; ALIGN 3 ASTRAL RINGS
+                                        </div>
+                                        <div class="font-mono-tech text-[10px] text-cyan-300/80">
+                                            REF PATH: <span class="text-white">${appState.directoryPath}</span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Right Column (7 Cols): Active Globe Attunement & Progress Tracker -->
-                                <div class="md:col-span-7 font-mono-tech space-y-3">
+                                <!-- Right Column (7 Cols): 3-Ring Alignment Dial Puzzle & Dice Calibration -->
+                                <div class="md:col-span-7 font-mono-tech space-y-2.5">
                                     
-                                    <!-- Quick Globe Selector Pills -->
+                                    <!-- Quick Globe Selector Tabs -->
                                     <div class="grid grid-cols-4 gap-1.5">
                                         ${astrolabeGlobeData.map((g, i) => `
                                             <button onclick="selectAstrolabeGlobe(${i})" class="py-1.5 px-2 rounded-lg border text-xs font-orbitron font-bold transition ${
@@ -1289,63 +1326,104 @@
                                         `).join('')}
                                     </div>
 
-                                    <!-- Selected Globe Inspection & Action Box -->
-                                    <div class="holo-panel p-4 rounded-2xl space-y-2.5 text-xs">
-                                        <div class="flex flex-wrap justify-between items-center border-b border-cyan-400/30 pb-1.5">
-                                            <span class="font-orbitron text-sm font-bold ${globes[selIdx] ? 'text-emerald-300' : 'text-glow-amber'}">
+                                    <!-- Active Globe 3-Ring Alignment Console -->
+                                    <div class="holo-panel p-3.5 rounded-2xl space-y-2.5 text-xs">
+                                        <div class="flex flex-wrap justify-between items-center border-b border-cyan-400/30 pb-1.5 gap-1">
+                                            <span class="font-orbitron text-xs sm:text-sm font-bold ${globes[selIdx] ? 'text-emerald-300' : 'text-glow-amber'}">
                                                 ${activeGlobe.title}
                                             </span>
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${globes[selIdx] ? 'bg-emerald-900/80 text-emerald-200 border border-emerald-400/50' : 'bg-amber-950/80 text-amber-300 border border-amber-400/50'}">
-                                                ${globes[selIdx] ? 'CONDUIT LOCKED' : 'AWAITING ATTUNEMENT'}
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+                                                globes[selIdx] 
+                                                    ? 'bg-emerald-900/80 text-emerald-200 border border-emerald-400/50' 
+                                                    : isCalibrated 
+                                                        ? 'bg-cyan-900/80 text-cyan-200 border border-cyan-400' 
+                                                        : 'bg-amber-950/80 text-amber-300 border border-amber-400/50'
+                                            }">
+                                                ${globes[selIdx] ? '✓ CONDUIT LOCKED' : isCalibrated ? '★ ROLL CALIBRATED (TARGETS REVEALED)' : 'UNENCRYPTED // DIAL RINGS'}
                                             </span>
                                         </div>
 
-                                        <p class="text-cyan-100 leading-relaxed">
-                                            ${activeGlobe.desc}
-                                        </p>
-
-                                        <div class="bg-slate-950/80 p-2.5 rounded-lg border border-cyan-500/30 space-y-1">
-                                            <div class="text-[10px] text-cyan-400 uppercase">TARGET ROUTING PARAMETER:</div>
-                                            <div class="text-amber-300 font-bold tracking-wider">${activeGlobe.targetParam}</div>
+                                        <div class="text-[11px] text-cyan-200/90 bg-slate-950/60 px-2.5 py-1.5 rounded border border-cyan-500/20">
+                                            ${activeGlobe.clueHint}
                                         </div>
 
-                                        <!-- Interactive Roll Resolution Buttons for the Active Globe -->
-                                        <div class="pt-1 flex flex-col sm:flex-row gap-2">
-                                            <button onclick="attuneSelectedGlobe()" class="flex-1 py-2.5 px-4 rounded-xl font-orbitron text-xs font-bold tracking-wider uppercase transition ${
+                                        <!-- 3 Interactive Rotating Ring Dials -->
+                                        <div class="space-y-1.5">
+                                            ${activeGlobe.rings.map((ring, rIdx) => {
+                                                const curOptIdx = activeDials[rIdx] || 0;
+                                                const curText = ring.options[curOptIdx];
+                                                const isTargetMatch = curOptIdx === ring.correct;
+                                                return `
+                                                    <div class="flex items-center justify-between bg-slate-950/85 border ${
+                                                        globes[selIdx] 
+                                                            ? 'border-emerald-500/60' 
+                                                            : (isCalibrated && isTargetMatch) 
+                                                                ? 'border-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.3)]' 
+                                                                : 'border-cyan-500/40'
+                                                    } rounded-lg p-1.5">
+                                                        <span class="text-[10px] text-cyan-400 uppercase tracking-wider w-28 sm:w-32 pl-1 font-bold">
+                                                            ${ring.label}:
+                                                        </span>
+                                                        <div class="flex items-center gap-1.5 flex-1 justify-between">
+                                                            <button onclick="rotateAstrolabeDial(${rIdx}, -1)" ${globes[selIdx] ? 'disabled' : ''} class="px-2.5 py-1 rounded bg-blue-950 hover:bg-cyan-800/70 border border-cyan-400/50 text-cyan-200 font-bold transition disabled:opacity-40">
+                                                                &lt;
+                                                            </button>
+                                                            <div class="text-center flex-1 font-bold tracking-wider ${
+                                                                globes[selIdx] || (isCalibrated && isTargetMatch) 
+                                                                    ? 'text-emerald-300' 
+                                                                    : 'text-amber-200'
+                                                            }">
+                                                                ${curText}
+                                                                ${isCalibrated && isTargetMatch ? '<span class="ml-1 text-[10px] text-emerald-400">[TARGET]</span>' : ''}
+                                                            </div>
+                                                            <button onclick="rotateAstrolabeDial(${rIdx}, 1)" ${globes[selIdx] ? 'disabled' : ''} class="px-2.5 py-1 rounded bg-blue-950 hover:bg-cyan-800/70 border border-cyan-400/50 text-cyan-200 font-bold transition disabled:opacity-40">
+                                                                &gt;
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+
+                                        <!-- Feedback Message Line -->
+                                        ${appState.astrolabeFeedback ? `
+                                            <div class="text-center text-[11px] font-bold px-2 py-1 rounded bg-slate-950/90 border border-cyan-400/30 text-amber-200">
+                                                ${appState.astrolabeFeedback}
+                                            </div>
+                                        ` : ''}
+
+                                        <!-- Action Buttons: Verify/Lock Rings + Tabletop Roll Calibration -->
+                                        <div class="pt-1 grid grid-cols-1 sm:grid-cols-12 gap-2">
+                                            <button onclick="verifyAndLockAstrolabeGlobe()" class="sm:col-span-7 py-2 px-3 rounded-xl font-orbitron text-xs font-bold tracking-wider uppercase transition ${
                                                 globes[selIdx]
                                                     ? 'bg-emerald-900/50 border border-emerald-400/60 text-emerald-200'
-                                                    : 'bg-gradient-to-r from-amber-600/80 to-cyan-600/80 hover:from-amber-500 hover:to-cyan-500 border border-amber-300 text-white shadow-[0_0_18px_rgba(251,191,36,0.4)]'
+                                                    : 'bg-gradient-to-r from-amber-600/90 to-cyan-600/90 hover:from-amber-500 hover:to-cyan-500 border border-amber-300 text-white shadow-[0_0_15px_rgba(251,191,36,0.4)]'
                                             }">
-                                                ${globes[selIdx] ? '✓ CONDUIT ATTUNED (CLICK TO TOGGLE)' : '⚡ ATTUNE & LOCK CONDUIT (ROLL SUCCESS)'}
+                                                ${globes[selIdx] ? '✓ CONDUIT LOCKED' : '⚡ ENGAGE CONDUIT LOCK (VERIFY RINGS)'}
                                             </button>
 
-                                            <button onclick="triggerAstrolabeStrike()" class="py-2.5 px-3 rounded-xl bg-rose-950/70 hover:bg-rose-900/80 border border-rose-400/60 font-orbitron text-[11px] font-bold text-rose-200 tracking-wider uppercase transition">
-                                                ⚠ AUDIT FLAG (+1)
+                                            <button onclick="calibrateAstrolabeViaRoll()" ${globes[selIdx] || isCalibrated ? 'disabled' : ''} class="sm:col-span-5 py-2 px-2.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/60 font-orbitron text-[10px] font-bold text-cyan-200 tracking-wider uppercase transition disabled:opacity-40">
+                                                🎲 ROLL SUCCESS: DECRYPT TARGETS
                                             </button>
                                         </div>
                                     </div>
 
                                     <!-- Overall Routing Status Banner -->
                                     ${allLocked ? `
-                                        <div class="p-3 rounded-xl bg-emerald-950/70 border-2 border-emerald-400 text-emerald-200 text-xs flex items-center justify-between shadow-[0_0_20px_rgba(16,185,129,0.35)]">
+                                        <div class="p-2.5 rounded-xl bg-emerald-950/70 border-2 border-emerald-400 text-emerald-200 text-xs flex items-center justify-between shadow-[0_0_20px_rgba(16,185,129,0.35)]">
                                             <div>
                                                 <div class="font-orbitron font-bold text-emerald-300 uppercase">✓ ALL 4 ASTRAL CONDUITS SYNCHRONIZED</div>
                                                 <div>Dossier #7734-GREY routed to <strong>Eastern Reader Booth #03</strong> (${strikes === 0 ? 'Zero Audit Flags — Clean Transfer' : `${strikes} Audit Flag(s) Logged`}).</div>
                                             </div>
                                         </div>
                                     ` : maxStrikes ? `
-                                        <div class="p-3 rounded-xl bg-rose-950/80 border-2 border-rose-400 text-rose-200 text-xs flex items-center justify-between animate-pulse">
+                                        <div class="p-2.5 rounded-xl bg-rose-950/80 border-2 border-rose-400 text-rose-200 text-xs flex items-center justify-between animate-pulse">
                                             <div>
                                                 <div class="font-orbitron font-bold text-rose-300 uppercase">⚠ 3 AUDIT FLAGS TRIGGERED // SENTRY VERIFICATION REQUIRED</div>
                                                 <div>Dossier routed to <strong>Eastern Reader Booth #03</strong> under Quarantine Flag. Rotunda Sentries alerted to verify Envoy credentials!</div>
                                             </div>
                                         </div>
-                                    ` : `
-                                        <div class="p-2.5 rounded-xl bg-blue-950/60 border border-cyan-400/30 text-[11px] text-cyan-200/90 flex justify-between items-center">
-                                            <span>ROTUNDA SECURITY MONITOR: <strong>2 SENTINEL UNITS OBSERVING</strong></span>
-                                            <span class="text-amber-300">LOCK ALL 4 GLOBES BEFORE 3 AUDIT FLAGS</span>
-                                        </div>
-                                    `}
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>
@@ -1840,37 +1918,88 @@
         /* Stage 2: 4-Globe Astrolabe Functions */
         function selectAstrolabeGlobe(idx) {
             appState.astrolabeSelectedGlobe = idx;
+            appState.astrolabeFeedback = '';
             playBeep(720, 0.04);
             broadcastState();
             renderStage();
         }
 
-        function attuneSelectedGlobe() {
-            const idx = appState.astrolabeSelectedGlobe ?? 0;
+        function rotateAstrolabeDial(ringIdx, dir) {
+            const selIdx = appState.astrolabeSelectedGlobe ?? 0;
+            if (!appState.astrolabeDials) {
+                appState.astrolabeDials = [[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
+            }
+            if (appState.astrolabeGlobes && appState.astrolabeGlobes[selIdx]) return;
+
+            const ringData = astrolabeGlobeData[selIdx].rings[ringIdx];
+            const len = ringData.options.length;
+            const currentVal = appState.astrolabeDials[selIdx][ringIdx] || 0;
+            appState.astrolabeDials[selIdx][ringIdx] = (currentVal + dir + len) % len;
+            appState.astrolabeFeedback = '';
+            playBeep(940 + (ringIdx * 110), 0.03, 'triangle');
+            broadcastState();
+            renderStage();
+        }
+
+        function calibrateAstrolabeViaRoll() {
+            const selIdx = appState.astrolabeSelectedGlobe ?? 0;
+            if (!appState.astrolabeCalibrated) {
+                appState.astrolabeCalibrated = [false, false, false, false];
+            }
+            appState.astrolabeCalibrated[selIdx] = true;
+            appState.astrolabeFeedback = `★ ROLL CALIBRATION COMPLETE: Rotate rings to match [TARGET] markers!`;
+            playSuccessChime();
+            broadcastState();
+            renderStage();
+        }
+
+        function verifyAndLockAstrolabeGlobe() {
+            const selIdx = appState.astrolabeSelectedGlobe ?? 0;
             if (!Array.isArray(appState.astrolabeGlobes)) {
                 appState.astrolabeGlobes = [false, false, false, false];
             }
-            appState.astrolabeGlobes[idx] = !appState.astrolabeGlobes[idx];
+            // If already locked, allow toggling off only if needed
+            if (appState.astrolabeGlobes[selIdx]) return;
 
-            // Auto-advance selector to next unlocked globe if we just locked one
-            if (appState.astrolabeGlobes[idx]) {
+            const globeConfig = astrolabeGlobeData[selIdx];
+            const currentDials = (appState.astrolabeDials && appState.astrolabeDials[selIdx]) || [0, 0, 0];
+
+            // Check if all 3 rings match the target coordinates
+            let correctCount = 0;
+            globeConfig.rings.forEach((r, i) => {
+                if (currentDials[i] === r.correct) correctCount++;
+            });
+
+            if (correctCount === 3) {
+                appState.astrolabeGlobes[selIdx] = true;
+                appState.astrolabeFeedback = `✓ ${globeConfig.roman} CONDUIT SYNCHRONIZED & LOCKED!`;
                 playSuccessChime();
+
+                // Auto-advance to the next unlocked globe after a brief moment
                 const nextUnlocked = appState.astrolabeGlobes.findIndex(g => !g);
                 if (nextUnlocked !== -1) {
                     appState.astrolabeSelectedGlobe = nextUnlocked;
                 }
             } else {
-                playBeep(520, 0.06);
+                appState.astrolabeStrikes = Math.min(3, (appState.astrolabeStrikes || 0) + 1);
+                appState.astrolabeFeedback = `⚠ ALIGNMENT MISMATCH (${correctCount}/3 RINGS CORRECT) — AUDIT FLAG LOGGED (+1)!`;
+                playAlertSiren();
             }
+
             broadcastState();
             renderStage();
         }
 
         function triggerAstrolabeStrike() {
             appState.astrolabeStrikes = Math.min(3, (appState.astrolabeStrikes || 0) + 1);
+            appState.astrolabeFeedback = `⚠ HARMONIC DESYNC — AUDIT FLAG LOGGED (+1)!`;
             playAlertSiren();
             broadcastState();
             renderStage();
+        }
+
+        function gmGrantCalibration() {
+            calibrateAstrolabeViaRoll();
         }
 
         function gmToggleGlobe(idx) {
@@ -1880,8 +2009,14 @@
             appState.astrolabeGlobes[idx] = !appState.astrolabeGlobes[idx];
             appState.astrolabeSelectedGlobe = idx;
             if (appState.astrolabeGlobes[idx]) {
+                // Also snap dials to correct answer when GM forces a globe lock
+                astrolabeGlobeData[idx].rings.forEach((r, rIdx) => {
+                    appState.astrolabeDials[idx][rIdx] = r.correct;
+                });
+                appState.astrolabeFeedback = `✓ GLOBE ${astrolabeGlobeData[idx].roman} LOCKED BY OVERRIDE.`;
                 playSuccessChime();
             } else {
+                appState.astrolabeFeedback = '';
                 playBeep(520, 0.06);
             }
             broadcastState();
@@ -1901,8 +2036,11 @@
 
         function gmResetAstrolabe() {
             appState.astrolabeGlobes = [false, false, false, false];
+            appState.astrolabeCalibrated = [false, false, false, false];
+            appState.astrolabeDials = [[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
             appState.astrolabeSelectedGlobe = 0;
             appState.astrolabeStrikes = 0;
+            appState.astrolabeFeedback = '';
             playBeep(580, 0.06);
             broadcastState();
             renderStage();
