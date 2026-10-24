@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>ac
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Summrial Dominion // Hall of Records Terminal</title>
@@ -1181,7 +1181,7 @@
                 /* --------------------------------------------------------------------
                  * STAGE 2: 4-GLOBE ASTRAL ASTROLABE ROUTING MATRIX (MINI-GAME)
                  * -------------------------------------------------------------------- */
-                case 'ACT1_ASTROMAP':
+                case 'ACT1_ASTROMAP': {
                     const globes = appState.astrolabeGlobes || [false, false, false, false];
                     const calibrated = appState.astrolabeCalibrated || [false, false, false, false];
                     const dials = appState.astrolabeDials || [[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
@@ -1430,6 +1430,7 @@
                         ${renderLiveTransmissionBanner()}
                     `;
                     break;
+                }
 
                 /* --------------------------------------------------------------------
                  * STAGE 3: SENSORY IMMERSION READER BOOTH (DOSSIER + EXPLOIT CONSOLE)
