@@ -691,6 +691,9 @@
                 directoryPath: 'ARCHIVE://SECTOR-09/PERSONNEL/7734-GREY',
                 indexUnlocked: false,
                 astrolabePassActive: false,
+                boothDossierLoaded: false,
+                boothConsoleOpen: false,
+                boothExploitInjected: false,
                 boothSubmitted: false,
                 chosenIdentity: null, // 'GIFTS' or 'SKILLS'
                 liveTransmission: '',
@@ -794,7 +797,13 @@
                         <div class="p-2 bg-slate-950 border border-emerald-500/40 rounded">
                             <strong class="text-emerald-300">🎲 ACTION ROLL #3 (Base Difficulty: 1 Success):</strong> Bypassing or overriding the booth door lock before the Sentry loops back.
                         </div>
-                        <div><strong class="text-amber-300">Inside the Booth:</strong> Once inside, the glass fogs up. Prompt the player to click <strong>EXECUTE RECORD ERASURE</strong> on the terminal screen. As soon as they do, click <strong>TRANSITION (System Reroute / Descent)</strong> in the Stage buttons below!</div>
+                        <div><strong class="text-amber-300">Inside the Booth (3-Step System Manipulation):</strong>
+                            <ol class="list-decimal list-inside pl-1 text-slate-300 space-y-1 mt-1">
+                                <li><strong>Load the Dossier:</strong> Player clicks <strong>LOAD DOSSIER</strong> to pull up File #7734-GREY. Point out that the standard Dominion interface is <strong>STRICTLY READ-ONLY</strong>—there is no delete button for regular users!</li>
+                                <li><strong>Open the Root Debug Console:</strong> Have the player click the discreet <strong>[&gt;_ OPEN SYS.DEBUG CONSOLE]</strong> button to bring up the raw command shell, enter their stolen authorization code (<span class="text-amber-300">CRADLE-7734</span>), and click <strong>INJECT DELETION PAYLOAD</strong>.</li>
+                                <li><strong>Execute the Purge:</strong> The exploit grafts an illegal red <strong>EXECUTE UNAUTHORIZED RECORD PURGE</strong> button onto the dossier. As soon as they click it, hit <strong>TRANSITION (System Reroute / Descent)</strong> below!</li>
+                            </ol>
+                        </div>
                     </div>
                 `
             },
@@ -993,193 +1002,146 @@
             switch (appState.currentStage) {
 
                 /* --------------------------------------------------------------------
-                 * STAGE 1: MASTER INDEX TERMINAL (NO SPOILERS)
-                 * -------------------------------------------------------------------- */
-                case 'ACT1_INDEX':
-                    headerLoc.innerText = 'SUMMRIAL DOMINION // HALL OF RECORDS // MASTER INDEX';
-                    subReadout.innerText = 'IDX-440';
-                    lvlReadout.innerText = 'WEST WING';
-                    gemTop.innerText = 'DIRECTIVE: ACTIVE';
-                    gemBottom.innerText = 'INDEX TERMINAL: ONLINE';
-
-                    container.innerHTML = `
-                        <div class="space-y-4">
-                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 tracking-wider leading-relaxed bg-blue-950/40 p-3 rounded-xl border border-cyan-400/30">
-                                <div>:: ARCHIVE DIRECTORY TERMINAL #882-B // NIGHT-SHIFT ACCESS ::</div>
-                                <div class="text-cyan-300/70">STATUS: Restricted personnel queries require valid clearance authorization.</div>
-                            </div>
-
-                            <div class="holo-pill py-3 px-6 text-center">
-                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.25em] text-glow uppercase">
-                                    PERSONNEL DOSSIER MASTER INDEX
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center pt-2">
-                                <!-- Left Double-Ring Circle: PC Portrait or Dominion Seal -->
-                                <div class="md:col-span-5 flex flex-col items-center justify-center">
-                                    ${renderPortraitCircle(appState.pcImage, 'OPERATIVE FILE SCAN')}
-                                    <span class="font-mono-tech text-xs text-cyan-300 mt-2 tracking-widest">SUBJECT: ${appState.pcName.toUpperCase()}</span>
-                                </div>
-
-                                <!-- Right Interactive Query Form -->
-                                <div class="md:col-span-7 space-y-3 font-mono-tech">
-                                    <div class="holo-panel p-4 rounded-2xl space-y-3">
-                                        <div class="text-xs text-cyan-300 uppercase tracking-widest border-b border-cyan-400/30 pb-1">
-                                            QUERY OPERATIVE RECORD LOCATION
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs text-cyan-200 mb-1">OPERATIVE IDENTIFIER:</label>
-                                            <div class="flex gap-2">
-                                                <input id="index-search-input" type="text" value="${appState.pcName}" class="flex-1 bg-blue-950/90 border border-cyan-300/60 rounded-lg px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-200">
-                                                <button onclick="handleIndexSearch()" class="holo-pill px-5 py-2 font-orbitron text-xs tracking-wider text-glow hover:bg-cyan-400/20 transition">
-                                                    QUERY
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div id="index-result-box" class="bg-slate-950/70 border border-cyan-400/40 rounded-xl p-3 text-xs space-y-1.5">
-                                            ${appState.indexUnlocked ? `
-                                                <div class="text-emerald-300 font-bold">✓ DOSSIER DIRECTORY LOCATED:</div>
-                                                <div>SUBJECT: <span class="text-white">${appState.pcName}</span> (${appState.pcPronouns})</div>
-                                                <div>ASSIGNED DIVISION: <span class="text-cyan-200">Envoy Corps</span></div>
-                                                <div>LOCAL DIRECTORY PATH:</div>
-                                                <div class="p-2 bg-blue-950 border border-amber-400/60 rounded text-amber-300 font-bold tracking-wider select-all">
-                                                    ${appState.directoryPath}
-                                                </div>
-                                                <div class="text-cyan-300/80 pt-1">
-                                                    NOTE: Private file access and record modification must be performed at an Eastern Wing Reader Booth.
-                                                </div>
-                                            ` : `
-                                                <div class="text-amber-300">STATUS: STANDBY FOR QUERY AUTHORIZATION...</div>
-                                                <div class="text-cyan-300/70">Enter operative identifier and execute query to retrieve local file directory path.</div>
-                                            `}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        ${renderLiveTransmissionBanner()}
-                    `;
-                    break;
-
-                /* --------------------------------------------------------------------
-                 * STAGE 2: CENTRAL ASTROLABE SECURITY GRID (NO SPOILERS)
-                 * -------------------------------------------------------------------- */
-                case 'ACT1_ASTROMAP':
-                    headerLoc.innerText = 'SUMMRIAL DOMINION // CENTRAL CHAMBER // ASTROLABE FLOOR MONITOR';
-                    subReadout.innerText = 'SEC-209';
-                    lvlReadout.innerText = 'CENTRAL HALL';
-                    gemTop.innerText = 'SECTOR MONITOR: ACTIVE';
-                    gemBottom.innerText = appState.astrolabePassActive ? 'FLOOR SENSORS: BYPASSED' : 'FLOOR SENSORS: ARMED';
-
-                    container.innerHTML = `
-                        <div class="space-y-4">
-                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 bg-blue-950/40 p-3 rounded-xl border border-cyan-400/30 flex justify-between items-center">
-                                <span>:: CENTRAL ASTRAL ASTROLABE TELEMETRY ::</span>
-                                <span class="${appState.astrolabePassActive ? 'text-emerald-300' : 'text-amber-300'} font-bold">
-                                    ${appState.astrolabePassActive ? 'TRANSIT CLEARANCE VERIFIED' : 'ACOUSTIC FLOOR SENSORS ACTIVE'}
-                                </span>
-                            </div>
-
-                            <div class="holo-pill py-2.5 px-6 text-center">
-                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.2em] text-glow uppercase">
-                                    ASTRAL ASTROLABE PRESSURE MATRIX
-                                </span>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-                                <div class="md:col-span-5 flex flex-col items-center">
-                                    <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/60 relative overflow-hidden">
-                                        <svg viewBox="0 0 120 120" class="w-44 h-44 animate-spin-slow">
-                                            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255, 195, 0, 0.5)" stroke-width="1.5" stroke-dasharray="6 4"/>
-                                            <circle cx="60" cy="60" r="36" fill="none" stroke="#5ce1e6" stroke-width="1.5"/>
-                                            <polygon points="60,12 102,85 18,85" fill="none" stroke="rgba(255, 195, 0, 0.65)" stroke-width="1.5"/>
-                                            <polygon points="60,108 102,35 18,35" fill="none" stroke="rgba(92, 225, 230, 0.65)" stroke-width="1.5"/>
-                                            <circle cx="60" cy="60" r="8" fill="rgba(255, 183, 3, 0.8)"/>
-                                        </svg>
-                                    </div>
-                                    <span class="font-mono-tech text-xs text-cyan-300 mt-2 tracking-widest">SECTOR PATROL STATUS: ACTIVE</span>
-                                </div>
-
-                                <div class="md:col-span-7 space-y-3 font-mono-tech">
-                                    <div class="holo-panel p-4 rounded-2xl space-y-3 text-xs sm:text-sm">
-                                        <div class="text-cyan-300 font-bold uppercase tracking-wider border-b border-cyan-400/30 pb-1">
-                                            SECTOR SECURITY TELEMETRY
-                                        </div>
-                                        <div class="space-y-2 text-cyan-100/90">
-                                            <div class="flex justify-between border-b border-cyan-500/20 pb-1">
-                                                <span>WEST ARCHIVE DESK:</span>
-                                                <span class="text-cyan-300">ONLINE</span>
-                                            </div>
-                                            <div class="flex justify-between border-b border-cyan-500/20 pb-1">
-                                                <span>ASTROLABE FLOOR CHIME:</span>
-                                                <span class="${appState.astrolabePassActive ? 'text-emerald-300' : 'text-amber-300'}">${appState.astrolabePassActive ? 'SUPPRESSED' : 'ARMED'}</span>
-                                            </div>
-                                            <div class="flex justify-between border-b border-cyan-500/20 pb-1">
-                                                <span>EASTERN READER BOOTHS:</span>
-                                                <span class="text-amber-300">AFTER-HOURS BARRIER ACTIVE</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        ${renderLiveTransmissionBanner()}
-                    `;
-                    break;
-
-                /* --------------------------------------------------------------------
-                 * STAGE 3: SENSORY IMMERSION READER BOOTH (NO TURBOLIFT SPOILERS)
+                 * STAGE 3: SENSORY IMMERSION READER BOOTH (DOSSIER + EXPLOIT CONSOLE)
                  * -------------------------------------------------------------------- */
                 case 'ACT1_BOOTH':
                     headerLoc.innerText = 'SUMMRIAL DOMINION // EASTERN WING // SENSORY IMMERSION BOOTH';
-                    subReadout.innerText = 'BTH-003';
+                    subReadout.innerText = appState.boothExploitInjected ? 'ERR-ROOT' : 'BTH-003';
                     lvlReadout.innerText = 'EAST WING';
                     gemTop.innerText = 'PRIVACY GLASS: OPAQUE';
-                    gemBottom.innerText = 'BOOTH TERMINAL: READY';
+                    gemBottom.innerText = appState.boothExploitInjected ? 'KERNEL: COMPROMISED' : 'MODE: READ-ONLY';
 
                     container.innerHTML = `
-                        <div class="space-y-4">
-                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 bg-blue-950/40 p-3 rounded-xl border border-cyan-400/30">
-                                :: SENSORY IMMERSION READER BOOTH SEALED // PRIVACY OPACITY AT 100% ::
-                            </div>
-
-                            <div class="holo-pill py-3 px-6 text-center">
-                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.22em] text-glow uppercase">
-                                    PRIVATE DOSSIER TERMINAL
+                        <div class="space-y-3">
+                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 bg-blue-950/40 p-2.5 rounded-xl border border-cyan-400/30 flex flex-wrap justify-between items-center gap-2">
+                                <span>:: SENSORY IMMERSION BOOTH #3 // PRIVACY OPACITY: 100% ::</span>
+                                <span class="px-2 py-0.5 rounded text-xs font-bold ${appState.boothExploitInjected ? 'bg-rose-600/80 text-white animate-pulse' : 'bg-blue-900/80 text-cyan-300 border border-cyan-400/40'}">
+                                    ${appState.boothExploitInjected ? '⚠ ROOT OVERRIDE INJECTED' : 'STANDARD USER TERMINAL (READ-ONLY)'}
                                 </span>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
-                                <div class="md:col-span-5 flex flex-col items-center">
-                                    ${renderPortraitCircle(appState.pcImage, 'OPERATIVE DOSSIER')}
-                                    <span class="font-mono-tech text-xs text-cyan-300 mt-2 tracking-widest">${appState.pcName.toUpperCase()}</span>
-                                </div>
-
-                                <div class="md:col-span-7 font-mono-tech">
-                                    <div class="holo-panel p-4 rounded-2xl space-y-3">
-                                        <div>
-                                            <label class="block text-xs text-cyan-300 mb-1">1. TARGET DIRECTORY PATH:</label>
-                                            <input type="text" value="${appState.directoryPath}" class="w-full bg-slate-950/80 border border-cyan-400/50 rounded px-3 py-1.5 text-xs text-cyan-200">
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs text-amber-300 mb-1">2. AUTHORIZATION / OVERRIDE CODE:</label>
-                                            <input id="booth-code-input" type="text" value="${appState.accessCode}" class="w-full bg-blue-950/90 border border-amber-400/70 rounded px-3 py-2 text-sm text-amber-200 font-bold tracking-widest focus:outline-none">
-                                        </div>
-                                        <div class="pt-2">
-                                            <button onclick="handleBoothSubmit()" class="w-full holo-pill py-3 font-orbitron text-sm font-bold tracking-widest text-glow hover:bg-cyan-400/30 transition">
-                                                EXECUTE RECORD ERASURE
-                                            </button>
-                                        </div>
-                                        ${appState.boothSubmitted ? `
-                                            <div class="p-2.5 rounded bg-amber-950/60 border border-amber-400/70 text-amber-200 text-xs text-center animate-pulse">
-                                                PROCESSING OVERRIDE CODE... PLEASE STAND BY.
-                                            </div>
-                                        ` : ''}
-                                    </div>
+                            <!-- Directory Mount Bar -->
+                            <div class="holo-panel p-3 rounded-2xl font-mono-tech">
+                                <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                                    <span class="text-xs text-cyan-300 whitespace-nowrap">ARCHIVE PATH:</span>
+                                    <input id="booth-path-input" type="text" value="${appState.directoryPath}" class="flex-1 bg-slate-950/90 border border-cyan-400/50 rounded-lg px-3 py-1.5 text-xs sm:text-sm text-cyan-100 focus:outline-none">
+                                    <button onclick="handleLoadBoothDossier()" class="holo-pill px-5 py-1.5 font-orbitron text-xs font-bold tracking-wider text-glow hover:bg-cyan-400/30 transition">
+                                        ${appState.boothDossierLoaded ? 'RELOAD DOSSIER' : 'LOAD DOSSIER'}
+                                    </button>
                                 </div>
                             </div>
+
+                            ${!appState.boothDossierLoaded ? `
+                                <!-- Standby Prompt Before Dossier is Loaded -->
+                                <div class="holo-panel rounded-2xl p-8 text-center font-mono-tech space-y-3 my-2 border-dashed">
+                                    <div class="text-cyan-300 text-sm tracking-widest uppercase">NO ACTIVE DOSSIER MOUNTED</div>
+                                    <p class="text-xs text-cyan-200/70 max-w-md mx-auto">
+                                        Verify target directory path above and press <span class="text-white font-bold">LOAD DOSSIER</span> to mount personnel file in Read-Only mode.
+                                    </p>
+                                </div>
+                            ` : `
+                                <!-- Mounted Dossier View + Optional Hacked Console -->
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                                    
+                                    <!-- Left Column: Portrait & Terminal Shell Toggle -->
+                                    <div class="md:col-span-4 flex flex-col items-center space-y-2">
+                                        ${renderPortraitCircle(appState.pcImage, 'OPERATIVE DOSSIER')}
+                                        <span class="font-mono-tech text-xs text-cyan-300 tracking-widest">${appState.pcName.toUpperCase()}</span>
+                                        
+                                        <!-- Discreet System CLI Trigger Button -->
+                                        <button onclick="toggleBoothConsole()" class="mt-1 px-3 py-1.5 rounded bg-slate-950/90 hover:bg-slate-900 border ${appState.boothConsoleOpen ? 'border-emerald-400 text-emerald-300' : 'border-cyan-500/40 text-cyan-300/80'} font-mono-tech text-[11px] tracking-wider transition flex items-center gap-1.5 shadow-inner">
+                                            <span>&gt;_</span>
+                                            <span>${appState.boothConsoleOpen ? 'HIDE SYS.DEBUG CLI' : 'OPEN SYS.DEBUG CLI'}</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Right Column: Read-Only Dossier + Injected Exploit Terminal -->
+                                    <div class="md:col-span-8 font-mono-tech space-y-3">
+                                        
+                                        <!-- Official Read-Only Dossier Panel -->
+                                        <div class="holo-panel p-4 rounded-2xl space-y-2.5 text-xs">
+                                            <div class="flex flex-wrap justify-between items-center border-b border-cyan-400/30 pb-1.5">
+                                                <span class="font-orbitron text-cyan-200 font-bold tracking-wider">OFFICIAL SERVICE DOSSIER // #7734-GREY</span>
+                                                <span class="px-2 py-0.5 rounded bg-blue-950 border border-cyan-400/40 text-[10px] text-cyan-300">
+                                                    PERMISSIONS: VIEW ONLY (NO WRITE/DELETE)
+                                                </span>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-cyan-100">
+                                                <div class="bg-slate-950/50 p-2 rounded border border-cyan-500/20">
+                                                    <span class="text-cyan-400/80 block text-[10px]">FULL NAME &amp; PRONOUNS:</span>
+                                                    <span class="text-white font-bold">${appState.pcName} (${appState.pcPronouns})</span>
+                                                </div>
+                                                <div class="bg-slate-950/50 p-2 rounded border border-cyan-500/20">
+                                                    <span class="text-cyan-400/80 block text-[10px]">CAREER ASSIGNMENT:</span>
+                                                    <span class="text-white font-bold">Envoy Corps // Diplomatic Attaché</span>
+                                                </div>
+                                                <div class="bg-slate-950/50 p-2 rounded border border-cyan-500/20">
+                                                    <span class="text-cyan-400/80 block text-[10px]">REGISTERED SKILLS:</span>
+                                                    <span class="text-cyan-200">Bureaucracy, Convincing, Leadership, Fighting</span>
+                                                </div>
+                                                <div class="bg-slate-950/50 p-2 rounded border border-cyan-500/20">
+                                                    <span class="text-cyan-400/80 block text-[10px]">PHYSICAL PROFILE:</span>
+                                                    <span class="text-cyan-200">${appState.pcAppearance}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="bg-slate-950/60 p-2.5 rounded border border-cyan-500/20 text-cyan-200/90 leading-relaxed">
+                                                <span class="text-cyan-400 font-bold">SERVICE SUMMARY:</span> Veteran operative with extensive field negotiations, administrative oversight, and classified frontier assignments. Current status: Active Duty.
+                                            </div>
+
+                                            <!-- Standard UI Notice vs Injected Exploit Delete Button -->
+                                            ${!appState.boothExploitInjected ? `
+                                                <div class="p-2 rounded bg-blue-950/70 border border-cyan-400/30 text-[11px] text-cyan-300/80 flex items-center justify-between">
+                                                    <span>🔒 RECORD DELETION / MODIFICATION DISABLED ON PUBLIC BOOTH TERMINALS.</span>
+                                                    <span class="text-[10px] text-cyan-400/60">ERR_READ_ONLY</span>
+                                                </div>
+                                            ` : `
+                                                <div class="pt-1 space-y-2">
+                                                    <div class="p-2 rounded bg-rose-950/80 border border-rose-400 text-[11px] text-rose-200 flex items-center justify-between">
+                                                        <span>⚡ UNAUTHORIZED ROOT HOOK ACTIVE: WRITE/DELETE LOCK BYPASSED</span>
+                                                        <span class="font-bold text-rose-300">WIPE_DOSSIER.EXE</span>
+                                                    </div>
+                                                    <button onclick="handleBoothSubmit()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-700 via-red-600 to-amber-600 hover:from-rose-600 hover:to-amber-500 border-2 border-rose-300 shadow-[0_0_25px_rgba(255,42,95,0.75)] font-orbitron text-xs sm:text-sm font-bold tracking-widest text-white uppercase transition transform hover:scale-[1.01]">
+                                                        [ ! OVERRIDE: EXECUTE UNAUTHORIZED RECORD PURGE ! ]
+                                                    </button>
+                                                </div>
+                                            `}
+
+                                            ${appState.boothSubmitted ? `
+                                                <div class="p-2.5 rounded bg-amber-950/80 border border-amber-400 text-amber-200 text-xs text-center animate-pulse">
+                                                    EXECUTING ROOT DELETION SCRIPT [CRADLE-7734]... VERIFYING CORE SECTORS...
+                                                </div>
+                                            ` : ''}
+                                        </div>
+
+                                        <!-- Raw Green-On-Black Hacker Shell / CLI Drawer -->
+                                        ${appState.boothConsoleOpen ? `
+                                            <div class="bg-black/95 border-2 border-emerald-500/80 rounded-xl p-3.5 shadow-[0_0_25px_rgba(16,185,129,0.3)] text-xs space-y-2.5">
+                                                <div class="flex items-center justify-between border-b border-emerald-500/30 pb-1 text-emerald-400">
+                                                    <span>ROOT@DOMINION-BOOTH-03:~# ./inject_override.sh</span>
+                                                    <span class="text-[10px] px-1.5 py-0.5 bg-emerald-950 border border-emerald-500/50 rounded">EXTERNAL EXPLOIT SHELL</span>
+                                                </div>
+                                                <div class="text-emerald-300/90 space-y-1 text-[11px] leading-relaxed">
+                                                    <div>&gt; TARGET MOUNTED: <span class="text-white">${appState.directoryPath}</span></div>
+                                                    <div>&gt; WRITE PROTECTION: <span class="text-amber-300">${appState.boothExploitInjected ? 'DISABLED (ROOT HOOKED)' : 'ACTIVE (KERNEL LOCK)'}</span></div>
+                                                    <div>&gt; ENTER STOLEN AUTHORIZATION TOKEN &amp; EXECUTE DELETION SCRIPT:</div>
+                                                </div>
+                                                <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                                                    <div class="flex items-center bg-emerald-950/40 border border-emerald-400/70 rounded px-2.5 py-1.5 flex-1">
+                                                        <span class="text-emerald-400 mr-2 font-bold">&gt;</span>
+                                                        <input id="booth-code-input" type="text" value="${appState.accessCode}" placeholder="Enter Authorization Token..." class="bg-transparent text-emerald-200 font-bold tracking-widest w-full focus:outline-none">
+                                                    </div>
+                                                    <button onclick="handleInjectBoothExploit()" class="bg-emerald-600/40 hover:bg-emerald-500/60 border border-emerald-300 text-emerald-100 font-orbitron font-bold text-[11px] px-4 py-2 rounded transition tracking-wider whitespace-nowrap shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+                                                        INJECT DELETION PAYLOAD
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+
+                                    </div>
+                                </div>
+                            `}
                         </div>
                         ${renderLiveTransmissionBanner()}
                     `;
@@ -1519,6 +1481,35 @@
         function toggleIndexUnlockFromGM() {
             appState.indexUnlocked = !appState.indexUnlocked;
             playBeep(740, 0.08);
+            broadcastState();
+            renderStage();
+        }
+
+        function handleLoadBoothDossier() {
+            const pathInput = document.getElementById('booth-path-input');
+            if (pathInput && pathInput.value.trim()) {
+                appState.directoryPath = pathInput.value.trim();
+            }
+            appState.boothDossierLoaded = true;
+            playSuccessChime();
+            broadcastState();
+            renderStage();
+        }
+
+        function toggleBoothConsole() {
+            appState.boothConsoleOpen = !appState.boothConsoleOpen;
+            playBeep(680, 0.06, 'square');
+            broadcastState();
+            renderStage();
+        }
+
+        function handleInjectBoothExploit() {
+            const codeInput = document.getElementById('booth-code-input');
+            if (codeInput && codeInput.value.trim()) {
+                appState.accessCode = codeInput.value.trim();
+            }
+            appState.boothExploitInjected = true;
+            playAlertSiren();
             broadcastState();
             renderStage();
         }
