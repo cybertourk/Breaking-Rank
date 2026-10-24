@@ -391,9 +391,12 @@
                         FACILITATOR OVERRIDE &amp; REMOTE CONTROLLER
                     </h2>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <button onclick="toggleGmNotesDrawer()" id="gm-notes-toggle-btn" class="px-3 py-1.5 rounded bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 font-orbitron text-xs border border-emerald-400/70 transition flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                         <span>📖</span> CAMPAIGN NOTES BY SECTION
+                    </button>
+                    <button onclick="handleResetButtonClick()" id="gm-reset-btn" class="px-3 py-1.5 rounded bg-rose-900/40 hover:bg-rose-700/60 text-rose-200 font-orbitron text-xs border border-rose-500/60 transition">
+                        ↺ FULL SESSION RESET
                     </button>
                     <button onclick="closeFacilitatorModal()" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono-tech text-xs border border-slate-600">
                         CLOSE [ESC]
@@ -671,35 +674,41 @@
         /* ============================================================================
          * 1. APPLICATION STATE & CAMPAIGN DATA (SPOILER-FREE PLAYER DISPLAY)
          * ============================================================================ */
-        let appState = {
-            currentStage: 'ACT1_INDEX',
-            pcName: 'Donovan Grey',
-            pcPronouns: 'He / Him',
-            pcAppearance: 'Middle-aged, clean-cut, professional, does not stand out in a crowd',
-            pcImage: 'pc_portrait.png',
-            caretakerImage: 'caretaker.png',
-            caretakerExpression: 'neutral',
-            caretakerExpressions: {
-                neutral: 'caretaker.png',
-                confused: 'caretakerconfused.png',
-                happy: 'caretakerhappy.png',
-                sad: 'caretakersad.png',
-                shocked: 'caretakershocked.png'
-            },
-            accessCode: 'CRADLE-7734',
-            directoryPath: 'ARCHIVE://SECTOR-09/PERSONNEL/7734-GREY',
-            indexUnlocked: false,
-            astrolabePassActive: false,
-            boothSubmitted: false,
-            chosenIdentity: null, // 'GIFTS' or 'SKILLS'
-            liveTransmission: '',
-            outcomeOverlay: null // { type, title, message }
-        };
+        function getDefaultAppState() {
+            return {
+                currentStage: 'ACT1_INDEX',
+                pcName: 'Donovan Grey',
+                pcPronouns: 'He / Him',
+                pcAppearance: 'Middle-aged, clean-cut, professional, does not stand out in a crowd',
+                pcImage: 'pc_portrait.png',
+                caretakerImage: 'caretaker.png',
+                caretakerExpression: 'neutral',
+                caretakerExpressions: {
+                    neutral: 'caretaker.png',
+                    confused: 'caretakerconfused.png',
+                    happy: 'caretakerhappy.png',
+                    sad: 'caretakersad.png',
+                    shocked: 'caretakershocked.png'
+                },
+                accessCode: 'CRADLE-7734',
+                directoryPath: 'ARCHIVE://SECTOR-09/PERSONNEL/7734-GREY',
+                indexUnlocked: false,
+                astrolabePassActive: false,
+                boothSubmitted: false,
+                chosenIdentity: null, // 'GIFTS' or 'SKILLS'
+                liveTransmission: '',
+                outcomeOverlay: null // { type, title, message }
+            };
+        }
+
+        let appState = getDefaultAppState();
 
         let sfxEnabled = true;
         let lensClickCount = 0;
         let lensClickTimer = null;
         let activeGmNoteSection = 'OVERVIEW';
+        let resetConfirmPending = false;
+        let resetConfirmTimer = null;
 
         /* ============================================================================
          * 1.5 FACILITATOR CAMPAIGN GUIDE DATA (ORGANIZED BY SECTION)
@@ -1669,6 +1678,80 @@
         function dismissOutcomeOverlay() {
             appState.outcomeOverlay = null;
             playBeep(520, 0.05);
+            broadcastState();
+            renderStage();
+        }
+
+        /* ============================================================================
+         * 4.5 FULL SESSION FACTORY RESET (TWO-TAP INLINE CONFIRMATION)
+         * ============================================================================ */
+        function handleResetButtonClick() {
+            const btn = document.getElementById('gm-reset-btn');
+            if (!resetConfirmPending) {
+                resetConfirmPending = true;
+                if (btn) {
+                    btn.innerText = '⚠ TAP AGAIN TO CONFIRM RESET';
+                    btn.className = 'px-3 py-1.5 rounded bg-rose-600 text-white font-orbitron font-bold text-xs border border-rose-300 animate-pulse transition';
+                }
+                playBeep(440, 0.08, 'sawtooth');
+                clearTimeout(resetConfirmTimer);
+                resetConfirmTimer = setTimeout(() => {
+                    resetConfirmPending = false;
+                    if (btn) {
+                        btn.innerText = '↺ FULL SESSION RESET';
+                        btn.className = 'px-3 py-1.5 rounded bg-rose-900/40 hover:bg-rose-700/60 text-rose-200 font-orbitron text-xs border border-rose-500/60 transition';
+                    }
+                }, 3500);
+            } else {
+                clearTimeout(resetConfirmTimer);
+                resetConfirmPending = false;
+                executeFullSessionReset();
+                if (btn) {
+                    btn.innerText = '✓ SESSION RESET COMPLETE';
+                    btn.className = 'px-3 py-1.5 rounded bg-emerald-600/50 text-emerald-100 font-orbitron font-bold text-xs border border-emerald-400 transition';
+                    setTimeout(() => {
+                        btn.innerText = '↺ FULL SESSION RESET';
+                        btn.className = 'px-3 py-1.5 rounded bg-rose-900/40 hover:bg-rose-700/60 text-rose-200 font-orbitron text-xs border border-rose-500/60 transition';
+                    }, 2000);
+                }
+            }
+        }
+
+        function executeFullSessionReset() {
+            // 1. Clear any saved browser state
+            try {
+                localStorage.removeItem('summrial_dominion_state');
+            } catch (e) {}
+
+            // 2. Restore fresh factory state
+            appState = getDefaultAppState();
+
+            // 3. Reset all GM Console inputs back to defaults
+            const nameInput = document.getElementById('gm-pc-name');
+            const pronounsInput = document.getElementById('gm-pc-pronouns');
+            const appInput = document.getElementById('gm-pc-appearance');
+            const codeInput = document.getElementById('gm-access-code');
+            const pcImgInput = document.getElementById('gm-pc-img');
+            const caretakerImgInput = document.getElementById('gm-caretaker-img');
+            const customOutcomeInput = document.getElementById('gm-outcome-custom');
+            const liveMsgInput = document.getElementById('gm-live-message');
+            const expLabel = document.getElementById('active-expression-label');
+
+            if (nameInput) nameInput.value = appState.pcName;
+            if (pronounsInput) pronounsInput.value = appState.pcPronouns;
+            if (appInput) appInput.value = 'Middle-aged, clean-cut, unremarkable';
+            if (codeInput) codeInput.value = appState.accessCode;
+            if (pcImgInput) pcImgInput.value = appState.pcImage;
+            if (caretakerImgInput) caretakerImgInput.value = appState.caretakerImage;
+            if (customOutcomeInput) customOutcomeInput.value = '';
+            if (liveMsgInput) liveMsgInput.value = '';
+            if (expLabel) expLabel.innerText = 'EXPRESSION: NEUTRAL';
+
+            // 4. Reset GM Campaign Notes tab to Overview
+            selectGmNoteSection('OVERVIEW');
+
+            // 5. Broadcast clean state to Table Monitor & re-render
+            playSuccessChime();
             broadcastState();
             renderStage();
         }
