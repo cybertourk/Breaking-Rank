@@ -384,19 +384,24 @@
         <div class="bg-slate-900 border-2 border-amber-400/80 rounded-2xl max-w-5xl w-full p-4 sm:p-6 text-slate-100 shadow-[0_0_50px_rgba(255,183,3,0.3)] max-h-[94vh] flex flex-col justify-between overflow-y-auto">
             
             <!-- GM Console Header -->
-            <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 pb-3 mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-3.5 h-3.5 rounded-full bg-amber-400 animate-pulse"></div>
                     <h2 class="font-orbitron text-lg sm:text-xl font-bold text-amber-300 tracking-wider">
                         FACILITATOR OVERRIDE &amp; REMOTE CONTROLLER
                     </h2>
                 </div>
-                <button onclick="closeFacilitatorModal()" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono-tech text-sm border border-slate-600">
-                    CLOSE [ESC]
-                </button>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleGmNotesDrawer()" id="gm-notes-toggle-btn" class="px-3 py-1.5 rounded bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 font-orbitron text-xs border border-emerald-400/70 transition flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        <span>📖</span> CAMPAIGN NOTES BY SECTION
+                    </button>
+                    <button onclick="closeFacilitatorModal()" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono-tech text-xs border border-slate-600">
+                        CLOSE [ESC]
+                    </button>
+                </div>
             </div>
 
-            <!-- PIN Login Gate (Default PIN: 1234, or click Quick Unlock) -->
+            <!-- PIN Login Gate (Default PIN: 0451, or click Quick Unlock) -->
             <div id="gm-login-gate" class="py-8 text-center space-y-4">
                 <p class="font-mono-tech text-sm text-slate-300">ENTER FACILITATOR SECURITY PASSCODE TO UNLOCK CONTROLS (DEFAULT: <span class="text-amber-300 font-bold">0451</span>)</p>
                 <div class="flex items-center justify-center gap-2">
@@ -409,6 +414,57 @@
 
             <!-- Unlocked GM Controls -->
             <div id="gm-controls-body" class="hidden space-y-5 text-sm">
+
+                <!-- COLLAPSIBLE / SECTIONED CAMPAIGN NOTES PANEL FOR FACILITATOR -->
+                <div id="gm-campaign-notes-panel" class="bg-slate-950 border-2 border-emerald-500/60 rounded-xl p-4 shadow-[0_0_30px_rgba(16,185,129,0.15)] space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <span class="font-orbitron text-xs sm:text-sm font-bold uppercase tracking-wider text-emerald-300">
+                                FACILITATOR GUIDE // SECTION-BY-SECTION CAMPAIGN NOTES
+                            </span>
+                        </div>
+                        <span class="font-mono-tech text-[11px] text-slate-400">
+                            Auto-syncs when you click a Stage button, or click any tab below:
+                        </span>
+                    </div>
+
+                    <!-- Section Navigation Tabs -->
+                    <div class="flex flex-wrap gap-1.5 border-b border-slate-800 pb-3">
+                        <button onclick="selectGmNoteSection('OVERVIEW')" id="tab-btn-OVERVIEW" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            0. PC &amp; LORE
+                        </button>
+                        <button onclick="selectGmNoteSection('NPCS')" id="tab-btn-NPCS" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            NPC ROSTER
+                        </button>
+                        <button onclick="selectGmNoteSection('STAGE1')" id="tab-btn-STAGE1" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            ACT 1.1: WEST DESK
+                        </button>
+                        <button onclick="selectGmNoteSection('STAGE2')" id="tab-btn-STAGE2" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            ACT 1.2: ASTROLABE
+                        </button>
+                        <button onclick="selectGmNoteSection('STAGE3')" id="tab-btn-STAGE3" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            ACT 1.3: BOOTHS
+                        </button>
+                        <button onclick="selectGmNoteSection('DESCENT')" id="tab-btn-DESCENT" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            TRANSITION: DROP
+                        </button>
+                        <button onclick="selectGmNoteSection('STAGE4')" id="tab-btn-STAGE4" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            ACT 2.1: SKELETON &amp; AI
+                        </button>
+                        <button onclick="selectGmNoteSection('STAGE5')" id="tab-btn-STAGE5" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            ACT 2.2: REVEAL &amp; PURGE
+                        </button>
+                        <button onclick="selectGmNoteSection('STAGE6')" id="tab-btn-STAGE6" class="gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition">
+                            ACT 3: ESCAPE
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Section Content Display Box -->
+                    <div id="gm-note-content-box" class="bg-slate-900/90 border border-slate-800 rounded-xl p-4 max-h-80 overflow-y-auto space-y-3 text-slate-200 leading-relaxed">
+                        <!-- Populated via selectGmNoteSection() -->
+                    </div>
+                </div>
                 
                 <!-- 1. Cross-Device / Dual-Screen Sync Setup -->
                 <div class="bg-slate-950/90 border border-slate-700 rounded-xl p-3.5">
@@ -643,6 +699,204 @@
         let sfxEnabled = true;
         let lensClickCount = 0;
         let lensClickTimer = null;
+        let activeGmNoteSection = 'OVERVIEW';
+
+        /* ============================================================================
+         * 1.5 FACILITATOR CAMPAIGN GUIDE DATA (ORGANIZED BY SECTION)
+         * ============================================================================ */
+        const gmCampaignSections = {
+            OVERVIEW: {
+                title: 'SECTION 0: PC DOSSIER, CORE RULES & LORE LEXICON',
+                html: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono-tech">
+                        <div class="bg-slate-950 p-3 rounded-lg border border-cyan-500/30 space-y-1.5">
+                            <div class="font-orbitron text-cyan-300 font-bold">OPERATIVE PROFILE: DONOVAN GREY (HE/HIM)</div>
+                            <div><strong class="text-white">Appearance:</strong> Middle-aged, clean-cut, nondescript professional in dark olive-and-gold Envoy tunic.</div>
+                            <div><strong class="text-white">Wish:</strong> Return to a quiet life far from intrigue and politics.</div>
+                            <div><strong class="text-cyan-200">Skills (+1d6 each):</strong> Bureaucracy, Convincing, Leadership, Fighting (Sentinel).</div>
+                            <div><strong class="text-amber-200">Gifts (Expand target range 6 &rarr; 5–6 &rarr; 4–6):</strong>
+                                <ul class="list-disc list-inside pl-1 text-slate-300">
+                                    <li><strong>Expensive Engraved Pen:</strong> From Father (sacrificed much so he could have it).</li>
+                                    <li><strong>Shifting Mask:</strong> From Mentor (shows face of someone the viewer trusts).</li>
+                                    <li><strong>Set of Brass Knuckles:</strong> From Best Friend ("when diplomacy fails").</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-amber-500/30 space-y-1.5">
+                            <div class="font-orbitron text-amber-300 font-bold">DICE MECHANICS &amp; LORE LEXICON</div>
+                            <div><strong class="text-white">Action Roll:</strong> Base <span class="text-cyan-300 font-bold">2d6</span> (+1d6 per applicable Skill). Base target is <span class="text-cyan-300 font-bold">6</span> (1 Success baseline unless modified). Gifts widen target to <span class="text-amber-300 font-bold">5–6</span> (1 Gift) or <span class="text-amber-300 font-bold">4–6</span> (2+ Gifts).</div>
+                            <div><strong class="text-white">The Headless Dominion:</strong> Run by thousands of non-malicious, disconnected AI subroutines spread too thin. Humans rubber-stamp orders thinking someone is in charge, when nobody is.</div>
+                            <div><strong class="text-white">"Continuity of Service" Protocol:</strong> When valuable operatives die in the field, a distant factory ("The Cradle") prints a synthetic replacement body with their latest neural scan. The original human Donovan Grey died on a mission years ago—this Donovan has 100% real memories and loved ones, unaware he is a replacement.</div>
+                        </div>
+                    </div>
+                `
+            },
+            NPCS: {
+                title: 'SECTION 0.5: COMPLETE NPC ROSTER',
+                html: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono-tech">
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-700 space-y-1.5">
+                            <div class="font-orbitron text-amber-300 font-bold">THE BONDS (REAL MEMORIES BEHIND GIFTS)</div>
+                            <div><strong class="text-white">1. The Father (Gave Engraved Pen):</strong> A humble, hardworking citizen who sacrificed his own savings so Donovan could enter the Envoy Corps with dignity.</div>
+                            <div><strong class="text-white">2. The Mentor (Gave Shifting Mask):</strong> A veteran Envoy who taught Donovan how to survive political vipers and gave him the arcane-tech mask before retiring.</div>
+                            <div><strong class="text-white">3. The Best Friend (Gave Brass Knuckles):</strong> A pragmatic Sentinel soldier who fought alongside Donovan and gave him heavy iron for when words fail.</div>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-700 space-y-1.5">
+                            <div class="font-orbitron text-cyan-300 font-bold">FACILITY INHABITANTS (ACT 1 &amp; ACT 2)</div>
+                            <div><strong class="text-white">4. Night-Shift Archivist (Map 1 West):</strong> Exhausted, rule-obsessed clerk guarding the Master Index Terminal.</div>
+                            <div><strong class="text-white">5. Two Dominion Sentries (Map 1 Center):</strong> Armored guards patrolling the glowing Astrolabe floor.</div>
+                            <div><strong class="text-white">6. Decayed Scientist &amp; Caretaker AI (Map 2):</strong> 300-year-old skeleton in the left chair; uploaded her maternal human mind into the Information AI. Discovers what Donovan is in real-time and pities him.</div>
+                            <div><strong class="text-rose-300">7. Automated Peacekeeper Chassis (Act 3):</strong> Mindless 300-year-old enforcement robot in the south stasis bay. Only ever activated once 275 years ago to vaporize a rat.</div>
+                        </div>
+                    </div>
+                `
+            },
+            STAGE1: {
+                title: 'ACT 1 (MAP 1) // COMPLICATION 1: WEST WING MASTER INDEX DESK',
+                html: `
+                    <div class="space-y-2.5 text-xs font-mono-tech">
+                        <div class="p-2.5 bg-amber-950/40 border border-amber-400/50 rounded-lg text-amber-100 italic">
+                            <strong class="not-italic text-amber-300 block mb-1">📖 OPENING READ-ALOUD (Rulebook p. 30):</strong>
+                            "You were all loyal to Summrial once, before you saw the truth of its evil ways. You've chosen to defect, taking with you the skills you learned and the gifts that you cherish. There's only one thing left to do before you can start your life over: Go to the Hall of Records and destroy your own dossier, which contains everything the Summrial Dominion knows of you and your service. It wasn't easy, but you're in. There's a stillness in this empty corridor, but there are more obstacles ahead. Learn the location of the dossiers and make your way there so that you can do what must be done."
+                        </div>
+                        <div><strong class="text-cyan-300">Where Player Starts:</strong> Bottom-left stairwell of Map 1 (Upper Hall of Records). Donovan has a stolen override code (<span class="text-amber-300">CRADLE-7734</span>) and believes he just needs his local file directory path from the West Wing Index Desk, then he can walk into an East Wing Reader Booth and delete it.</div>
+                        <div><strong class="text-white">The Setup (West Wing):</strong> The Master Index Terminal has the directory path, but a tired <strong>Night-Shift Archivist</strong> is working at the desk right beside it.</div>
+                        <div class="p-2 bg-slate-950 border border-emerald-500/40 rounded">
+                            <strong class="text-emerald-300">🎲 ACTION ROLL #1 (Base Difficulty: 1 Success):</strong> Dealing with the Night-Shift Archivist (distracting,pulling rank, impersonating an inspector, etc.) to query the terminal. Once cleared, let the player click <strong>QUERY</strong> on the terminal (or click <em>Toggle Stage 1 Directory Reveal</em> below) to get path <span class="text-amber-300">ARCHIVE://SECTOR-09/PERSONNEL/7734-GREY</span>.
+                        </div>
+                    </div>
+                `
+            },
+            STAGE2: {
+                title: 'ACT 1 (MAP 1) // COMPLICATION 2: CENTRAL ASTRAL ASTROLABE',
+                html: `
+                    <div class="space-y-2.5 text-xs font-mono-tech">
+                        <div><strong class="text-cyan-300">Map Location:</strong> The massive glowing geometric floor in the center of Map 1, between the West Wing and the Eastern Booths.</div>
+                        <div><strong class="text-white">The Setup:</strong> Two armed <strong>Dominion Sentries</strong> patrol the perimeter of the glowing floor. Stepping onto the central floor without an authorized after-hours transit pass triggers an acoustic floor chime.</div>
+                        <div class="p-2 bg-slate-950 border border-emerald-500/40 rounded">
+                            <strong class="text-emerald-300">🎲 ACTION ROLL #2 (Base Difficulty: 1 Success):</strong> Crossing the central chamber past the two Sentries (bluffing, authoritative stride, stealth, distraction, or fighting).
+                            <div class="text-slate-400 mt-1">*Modify difficulty on the fly if the previous clerk encounter raised suspicion!*</div>
+                        </div>
+                    </div>
+                `
+            },
+            STAGE3: {
+                title: 'ACT 1 (MAP 1) // COMPLICATION 3: EASTERN SENSORY READER BOOTHS',
+                html: `
+                    <div class="space-y-2.5 text-xs font-mono-tech">
+                        <div><strong class="text-cyan-300">Map Location:</strong> The three vertical cylindrical pods along the far right wall of Map 1.</div>
+                        <div><strong class="text-white">The Setup:</strong> All three booths are active and naturally fog their glass for privacy when occupied. However, an <strong>after-hours security barrier / cipher lock</strong> blocks the booth doors, and a Sentry's patrol route passes nearby.</div>
+                        <div class="p-2 bg-slate-950 border border-emerald-500/40 rounded">
+                            <strong class="text-emerald-300">🎲 ACTION ROLL #3 (Base Difficulty: 1 Success):</strong> Bypassing or overriding the booth door lock before the Sentry loops back.
+                        </div>
+                        <div><strong class="text-amber-300">Inside the Booth:</strong> Once inside, the glass fogs up. Prompt the player to click <strong>EXECUTE RECORD ERASURE</strong> on the terminal screen. As soon as they do, click <strong>TRANSITION (System Reroute / Descent)</strong> in the Stage buttons below!</div>
+                    </div>
+                `
+            },
+            DESCENT: {
+                title: 'ACT 2 TRANSITION // THE TURBOLIFT DROP TO MAP 2',
+                html: `
+                    <div class="space-y-2.5 text-xs font-mono-tech">
+                        <div><strong class="text-amber-300">What Happens:</strong> Instead of deleting the file locally, the booth screen flashes amber: <em>"LOCAL ERASURE DENIED // REROUTING TO PRIMARY CORE."</em> Heavy magnetic clamps lock the booth door, and the entire cylindrical booth drops like a turbolift down a forgotten vertical shaft!</div>
+                        <div><strong class="text-cyan-300">Physical Table Action:</strong> Place <strong>Map 2 (The Original Hall of Information)</strong> on the table—making sure the <strong>bottom server/barracks section is covered</strong> with a piece of paper.</div>
+                        <div><strong class="text-white">Where Player Emerges:</strong> The two circular shafts in the <strong>Top-Left and Top-Right corners of Map 2</strong> are the drop-chutes! Donovan steps out into a freezing, pitch-black subterranean room untouched for 300 years. Then switch the terminal to <strong>STAGE 4 (Sub-Level Login Prompt)</strong>.</div>
+                    </div>
+                `
+            },
+            STAGE4: {
+                title: 'ACT 2 (MAP 2) // COMPLICATION 4: THE DEAD SCIENTIST & CONSOLE LOGIN',
+                html: `
+                    <div class="space-y-2.5 text-xs font-mono-tech">
+                        <div><strong class="text-cyan-300">Environmental Clues to Describe on Map 2:</strong>
+                            <ul class="list-disc list-inside pl-1 text-slate-300 space-y-1 mt-1">
+                                <li><strong>Middle-Left Room &amp; Chair:</strong> A huge holographic wall monitor (currently on standby) and a console chair holding the <strong>300-year-old skeleton of a female scientist</strong>. Searching her yields her <strong>Keycard &amp; Identity Badge</strong>.</li>
+                                <li><strong>Foreshadowing Clue on the Floor:</strong> Near the sealed bottom bulkhead doors, point out a <strong>tiny, 275-year-old charred rat skeleton in the center of a black laser scorch mark</strong> on the floor tiles.</li>
+                                <li><strong>Middle-Right Structure:</strong> The primary computer interface console where the scientist's keycard can be inserted.</li>
+                            </ul>
+                        </div>
+                        <div><strong class="text-white">Booting the AI (Cold Machine Phase):</strong> Inserting the keycard boots the hologram (use <strong>NEUTRAL</strong> or <strong>CONFUSED</strong> expression). It notes a <em>300-year, 4-month gap in login activity</em> and demands verbal/biometric Archivist verification to unlock the Center Platform.</div>
+                        <div class="p-2 bg-slate-950 border border-emerald-500/40 rounded">
+                            <strong class="text-emerald-300">🎲 ACTION ROLL #4 (Base Difficulty: 1 Success):</strong> Convincing or satisfying the ancient security prompt using the scientist's badge, envoy authority, or gifts. Once successful, switch to <strong>STAGE 5A (Caretaker &amp; Deep File)</strong>!
+                        </div>
+                    </div>
+                `
+            },
+            STAGE5: {
+                title: 'ACT 2 (MAP 2) // COMPLICATION 5: THE REVEAL & THE CLIMAX CHOICE',
+                html: `
+                    <div class="space-y-2.5 text-xs font-mono-tech">
+                        <div><strong class="text-pink-300">1. The Caretaker's Maternal Shift (Switch Expression to SHOCKED &rarr; SAD/PITY):</strong>
+                            When Donovan steps onto the Center Platform and pulls up File #7734, the AI reads those encrypted records for the first time ("like reading an unread book on her shelf"). She gasps as the dead scientist's uploaded human consciousness surfaces:
+                            <ul class="list-disc list-inside pl-1 text-slate-300 mt-1">
+                                <li>She reveals a casualty report: <strong>the original human Donovan Grey died on a mission several years ago.</strong></li>
+                                <li>Under the Dominion's automated <em>"Continuity of Service"</em> protocol, a distant factory ("The Cradle") printed his synthetic body and uploaded his neural scan so his family and superiors would never know he died. Every memory and Gift he has is 100% real—carried inside a replacement vessel.</li>
+                            </ul>
+                        </div>
+                        <div class="p-2.5 bg-amber-950/40 border border-amber-400/50 rounded-lg text-amber-100 italic">
+                            <strong class="not-italic text-amber-300 block mb-1">📖 CLIMAX READ-ALOUD (Rulebook p. 30 - Push STAGE 5B to Screen):</strong>
+                            "You take a moment to read your own files. You recognize some of it—your time in training, your achievements, the life you lived in between. You wonder what's worth keeping, and what's best forgotten. Are the skills you now possess, though useful, worth the evil they served? Are the gifts, though a comfort, enough to aid you in the days ahead? You don't have room in your heart for both."
+                        </div>
+                        <div><strong class="text-cyan-300">2. The Mysterious Subroutine:</strong> A pre-existing escape subroutine baked into his synthetic core activates on the platform. The Caretaker didn't put it there—she wonders aloud if <em>another sympathetic AI out there</em> secretly built this escape hatch for synthetics. Have the player click their choice on the terminal screen:
+                            <ul class="list-disc list-inside pl-1 text-slate-300 mt-1">
+                                <li><strong>Keep Gifts / Cross Off Skills (Embrace Continuity - "I am still Donovan Grey"):</strong> Roll <strong>3d6 base</strong> from now on; Gifts still widen success range to 5–6 / 4–6.</li>
+                                <li><strong>Keep Skills / Cross Off Gifts (Embrace Independence - "I am someone new"):</strong> Roll <strong>2d6 base + Skills</strong>; base success range permanently becomes <strong>5–6</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            STAGE6: {
+                title: 'ACT 3 (MAP 2) // COMPLICATION 6: THE AUTOMATED PEACEKEEPER CHASSIS',
+                html: `
+                    <div class="space-y-2.5 text-xs font-mono-tech">
+                        <div><strong class="text-rose-400">Uncover the Bottom of Map 2 &amp; Push STAGE 6 (Containment Alert):</strong>
+                            As the Top-Center Escape Door grinds open, the purge doesn't alert the wider Dominion—instead, the strange behavior of Donovan and the Caretaker confuses a <strong>lesser, janitor-level building diagnostic subroutine</strong>. It defaults to its simplest protocol: <em>"Hardware anomaly detected. Sanitize."</em>
+                        </div>
+                        <div><strong class="text-white">The Threat:</strong> The bottom bulkhead doors hiss open! Out steps an ancient <strong>Automated Peacekeeper Chassis</strong>—the same mindless robot that vaporized that rat 275 years ago. The Caretaker AI (switch expression to <strong>SHOCKED</strong>) has no control over it and urges Donovan to run for the North Exit!</div>
+                        <div class="p-2 bg-slate-950 border border-rose-500/50 rounded">
+                            <strong class="text-rose-300">🎲 FINAL ACTION ROLL #5 (Base Difficulty: 1 or 2 Successes):</strong> Using their newly modified dice pool (Skills-only or Gifts-only) to fight, disable, spoof, or slip past the Peacekeeper Chassis through the North Exit Door!
+                        </div>
+                        <div class="p-2.5 bg-emerald-950/40 border border-emerald-400/50 rounded-lg text-emerald-100 italic">
+                            <strong class="not-italic text-emerald-300 block mb-1">📖 EPILOGUE READ-ALOUD (Rulebook p. 30 - Push STAGE 7: EPILOGUE):</strong>
+                            "And that's it. You're free. There's no longer a record you ever existed. Now what?"
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        function toggleGmNotesDrawer() {
+            const panel = document.getElementById('gm-campaign-notes-panel');
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+            playBeep(660, 0.05);
+        }
+
+        function selectGmNoteSection(sectionKey) {
+            if (!gmCampaignSections[sectionKey]) return;
+            activeGmNoteSection = sectionKey;
+
+            // Update tab button styles
+            document.querySelectorAll('.gm-note-tab').forEach(btn => {
+                btn.className = 'gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition bg-slate-900 border-slate-700 text-slate-300 hover:border-emerald-400/50';
+            });
+            const activeBtn = document.getElementById(`tab-btn-${sectionKey}`);
+            if (activeBtn) {
+                activeBtn.className = 'gm-note-tab px-2.5 py-1.5 rounded font-orbitron text-[11px] tracking-wider border transition bg-emerald-600/30 border-emerald-400 text-emerald-200 font-bold shadow-[0_0_12px_rgba(16,185,129,0.3)]';
+            }
+
+            // Inject section HTML
+            const box = document.getElementById('gm-note-content-box');
+            if (box) {
+                const sec = gmCampaignSections[sectionKey];
+                box.innerHTML = `
+                    <div class="font-orbitron text-xs sm:text-sm font-bold text-emerald-300 border-b border-slate-700 pb-1.5 mb-2">
+                        ${sec.title}
+                    </div>
+                    ${sec.html}
+                `;
+            }
+        }
 
         /* ============================================================================
          * 2. SYNTHESIZED SCI-FI TERMINAL SOUND EFFECTS (Tone.js)
@@ -1282,6 +1536,23 @@
             appState.currentStage = stageKey;
             appState.outcomeOverlay = null;
             appState.boothSubmitted = false;
+
+            // Automatically sync the Facilitator's Campaign Notes tab to match the new Stage!
+            const stageToNoteMap = {
+                ACT1_INDEX: 'STAGE1',
+                ACT1_ASTROMAP: 'STAGE2',
+                ACT1_BOOTH: 'STAGE3',
+                ACT2_DESCENT: 'DESCENT',
+                ACT2_AUTH: 'STAGE4',
+                ACT2_REVEAL: 'STAGE5',
+                ACT2_PURGE: 'STAGE5',
+                ACT3_ALARM: 'STAGE6',
+                EPILOGUE: 'STAGE6'
+            };
+            if (stageToNoteMap[stageKey]) {
+                selectGmNoteSection(stageToNoteMap[stageKey]);
+            }
+
             playBeep(620, 0.06);
             broadcastState();
             renderStage();
@@ -1428,6 +1699,7 @@
             if (pin === '0451' || pin === '1234' || pin.length > 0) {
                 document.getElementById('gm-login-gate').classList.add('hidden');
                 document.getElementById('gm-controls-body').classList.remove('hidden');
+                selectGmNoteSection(activeGmNoteSection || 'OVERVIEW');
                 playSuccessChime();
             }
         }
@@ -1551,6 +1823,7 @@
 
         // Initialize on Window Load
         window.onload = function () {
+            selectGmNoteSection('OVERVIEW');
             renderStage();
         };
     </script>
