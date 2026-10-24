@@ -1002,6 +1002,143 @@
             switch (appState.currentStage) {
 
                 /* --------------------------------------------------------------------
+                 * STAGE 1: WEST WING MASTER INDEX TERMINAL (MAP 1)
+                 * -------------------------------------------------------------------- */
+                case 'ACT1_INDEX':
+                    headerLoc.innerText = 'SUMMRIAL DOMINION // HALL OF RECORDS // WEST WING INDEX';
+                    subReadout.innerText = 'ARC-904';
+                    lvlReadout.innerText = 'UPPER-01';
+                    gemTop.innerText = 'AUTOMATED DIRECTIVE: ACTIVE';
+                    gemBottom.innerText = 'LOCAL MONITOR: NOMINAL';
+
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="font-mono-tech text-xs sm:text-sm text-cyan-200/90 bg-blue-950/40 p-2.5 rounded-xl border border-cyan-400/30 flex flex-wrap justify-between">
+                                <span>:: ARCHIVE REGISTRY TERMINAL // WEST WING CLERK STATION ::</span>
+                                <span>STATUS: ${appState.indexUnlocked ? 'RECORD LOCATED' : 'AWAITING QUERY'}</span>
+                            </div>
+
+                            <!-- Central Pill Header (Directly matching reference image layout) -->
+                            <div class="holo-pill py-2.5 px-6 text-center">
+                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.2em] text-glow uppercase">
+                                    MASTER DOSSIER DIRECTORY SEARCH
+                                </span>
+                            </div>
+
+                            <!-- Main Split Body: Left Double-Ring Circle + Right Data Block -->
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center pt-1">
+                                <div class="md:col-span-5 flex flex-col items-center">
+                                    ${renderPortraitCircle(appState.pcImage, 'SUBJECT PROFILE')}
+                                    <span class="font-mono-tech text-xs text-cyan-300 mt-2 tracking-widest uppercase">
+                                        ${appState.indexUnlocked ? appState.pcName : 'OPERATIVE REGISTRY'}
+                                    </span>
+                                </div>
+
+                                <div class="md:col-span-7 font-mono-tech space-y-3">
+                                    <div class="holo-panel p-4 rounded-2xl space-y-3">
+                                        <label class="block text-xs text-cyan-300 tracking-wider uppercase">
+                                            ENTER OPERATIVE DESIGNATION TO LOCATE FILE PATH:
+                                        </label>
+                                        <div class="flex flex-col sm:flex-row gap-2">
+                                            <input id="index-search-input" type="text" value="${appState.pcName}" class="flex-1 bg-slate-950/80 border border-cyan-400/60 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
+                                            <button onclick="handleIndexSearch()" class="holo-pill px-6 py-2 font-orbitron text-xs font-bold tracking-widest text-glow hover:bg-cyan-400/30 transition">
+                                                QUERY
+                                            </button>
+                                        </div>
+
+                                        ${appState.indexUnlocked ? `
+                                            <div class="p-3 rounded-xl bg-emerald-950/50 border border-emerald-400/60 space-y-1.5 text-xs">
+                                                <div class="text-emerald-300 font-bold tracking-wider">✓ DOSSIER DIRECTORY LOCATED:</div>
+                                                <div class="text-white font-bold break-all bg-slate-950/80 p-2 rounded border border-emerald-500/30">
+                                                    ${appState.directoryPath}
+                                                </div>
+                                                <div class="text-cyan-200/90 pt-1">
+                                                    ASSIGNED VIEWING TERMINAL: <span class="text-amber-300 font-bold">EASTERN WING // SENSORY IMMERSION BOOTHS</span>
+                                                </div>
+                                            </div>
+                                        ` : `
+                                            <div class="p-3 rounded-xl bg-blue-950/60 border border-cyan-400/30 text-xs text-cyan-300/80">
+                                                SYSTEM NOTE: Querying restricted operative records requires clearance at the West Wing Archivist Desk.
+                                            </div>
+                                        `}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
+                 * STAGE 2: CENTRAL ASTRAL ASTROLABE SECURITY GRID (MAP 1)
+                 * -------------------------------------------------------------------- */
+                case 'ACT1_ASTROMAP':
+                    headerLoc.innerText = 'SUMMRIAL DOMINION // CENTRAL CHAMBER // ASTROLABE SECURITY GRID';
+                    subReadout.innerText = 'SEC-209';
+                    lvlReadout.innerText = 'UPPER-CENTER';
+                    gemTop.innerText = 'SENTRY PATROL: 2 UNITS';
+                    gemBottom.innerText = 'FLOOR CHIME: ARMED';
+
+                    container.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="font-mono-tech text-xs sm:text-sm text-amber-200 bg-blue-950/50 p-2.5 rounded-xl border border-amber-400/40 flex flex-wrap justify-between">
+                                <span>:: CENTRAL ASTRAL ASTROLABE FLOOR TELEMETRY ::</span>
+                                <span>WARNING: ACOUSTIC PRESSURE CHIMES ACTIVE</span>
+                            </div>
+
+                            <div class="holo-pill py-2.5 px-6 text-center">
+                                <span class="font-orbitron text-base sm:text-xl font-bold tracking-[0.2em] text-glow uppercase">
+                                    ASTRAL ASTROLABE PRESSURE MATRIX
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center pt-1">
+                                <!-- Rotating Geometric Astrolabe Radar -->
+                                <div class="md:col-span-5 flex flex-col items-center">
+                                    <div class="w-44 h-44 sm:w-52 sm:h-52 rounded-full double-ring-circle flex items-center justify-center bg-blue-950/60 relative">
+                                        <svg viewBox="0 0 100 100" class="w-40 h-40 animate-spin-slow">
+                                            <circle cx="50" cy="50" r="44" fill="none" stroke="#38b6ff" stroke-width="1" stroke-dasharray="4 3"/>
+                                            <polygon points="50,8 86,72 14,72" fill="none" stroke="#5ce1e6" stroke-width="1.5"/>
+                                            <polygon points="50,92 86,28 14,28" fill="none" stroke="#5ce1e6" stroke-width="1.5"/>
+                                            <circle cx="50" cy="50" r="18" fill="none" stroke="#ffb703" stroke-width="1.5"/>
+                                            <circle cx="50" cy="50" r="5" fill="#ffb703"/>
+                                        </svg>
+                                    </div>
+                                    <span class="font-mono-tech text-xs text-amber-300 mt-2 tracking-widest">2 DOMINION SENTRIES ON PATROL</span>
+                                </div>
+
+                                <!-- Right Telemetry Box -->
+                                <div class="md:col-span-7 font-mono-tech space-y-3">
+                                    <div class="holo-panel p-4 rounded-2xl space-y-3 text-xs sm:text-sm">
+                                        <div class="text-cyan-300 font-bold uppercase tracking-wider border-b border-cyan-400/30 pb-1">
+                                            EASTERN WING TRANSIT DIAGNOSTIC
+                                        </div>
+                                        <p class="text-cyan-100 leading-relaxed">
+                                            After-hours acoustic floor sensors are active across the Central Astrolabe rotunda between the West Index Wing and the Eastern Sensory Immersion Booths.
+                                        </p>
+                                        <div class="bg-slate-950/70 p-3 rounded-xl border border-cyan-400/30 space-y-1.5 text-xs">
+                                            <div class="flex justify-between">
+                                                <span>ROTUNDA FLOOR SENSORS:</span>
+                                                <span class="text-amber-300 font-bold">ARMED (CHIME TRIGGER)</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>ACTIVE GUARD PATROL:</span>
+                                                <span class="text-cyan-200 font-bold">2 SENTINEL UNITS</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>DESTINATION SECTOR:</span>
+                                                <span class="text-emerald-300 font-bold">EASTERN READER BOOTHS</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${renderLiveTransmissionBanner()}
+                    `;
+                    break;
+
+                /* --------------------------------------------------------------------
                  * STAGE 3: SENSORY IMMERSION READER BOOTH (DOSSIER + EXPLOIT CONSOLE)
                  * -------------------------------------------------------------------- */
                 case 'ACT1_BOOTH':
